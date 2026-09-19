@@ -1,0 +1,26 @@
+{
+  "family": "alpha-web-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::420943511468:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "alpha-web-container",
+      "image": "420943511468.dkr.ecr.ap-south-1.amazonaws.com/alpha-web:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "3000" }
+      ]
+    }
+  ]
+}

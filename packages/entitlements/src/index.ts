@@ -1,0 +1,70 @@
+import { query } from '@alpha/database';
+
+export class EntitlementEngine {
+  /**
+   * Resolves effective entitlements for a workspace by fetching active plan definition and overrides.
+   */
+  static async getEffectiveEntitlements(workspaceId: string): Promise<Record<string, any>> {
+    // 1. Fetch Active Subscription & Plan
+    const subRes = await query(
+      `SELECT s.plan_id, p.entitlements_schema
+       FROM subscriptions s
+       JOIN plans p ON s.plan_id = p.id
+       WHERE s.workspace_id = $1 AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')`,
+      [workspaceId]
+    );
+
+    let baseEntitlements: Record<string, any> = {};
+
+    if (subRes.rowCount && subRes.rowCount > 0) {
+      baseEntitlements = subRes.rows[0].entitlements_schema;
+    } else {
+      // Fallback to Free Personal Plan Defaults
+      const freePlanRes = await query(`SELECT entitlements_schema FROM plans WHERE id = 'plan_free_personal'`);
+      if (freePlanRes.rowCount && freePlanRes.rowCount > 0) {
+        baseEntitlements = freePlanRes.rows[0].entitlements_schema;
+      }
+    }
+
+    return baseEntitlements;
+  }
+
+  /**
+   * Checks if a workspace has boolean access to a feature entitlement.
+   */
+  static async canAccessFeature(workspaceId: string, featureKey: string): Promise<boolean> {
+    const entitlements = await this.getEffectiveEntitlements(workspaceId);
+    const value = entitlements[featureKey];
+    return value === true || value === 'Full' || value === 'Basic';
+  }
+
+  /**
+   * Evaluates if current usage count exceeds plan numeric limit entitlement.
+   * Return value: { isAllowed: boolean, limit: number, currentUsage: number }
+   */
+  static async checkUsageLimit(
+    workspaceId: string,
+    limitKey: string,
+    currentUsage: number
+  ): Promise<{ isAllowed: boolean; limit: number; currentUsage: number }> {
+    const entitlements = await this.getEffectiveEntitlements(workspaceId);
+    let limit = entitlements[limitKey];
+
+    if (limit === undefined || limit === null) {
+      if (limitKey === 'cards.max_active_count') limit = 50;
+      else if (limitKey === 'members.max_seats') limit = 10;
+      else limit = 100;
+    }
+
+    // Value -1 denotes unlimited
+    if (limit === -1) {
+      return { isAllowed: true, limit, currentUsage };
+    }
+
+    return {
+      isAllowed: currentUsage < limit,
+      limit,
+      currentUsage
+    };
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@alpha/analytics",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@alpha/config": "1.0.0",
+    "@alpha/database": "1.0.0",
+    "@alpha/types": "1.0.0"
+  }
+}

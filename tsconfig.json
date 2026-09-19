@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@alpha/config": ["packages/config/dist"],
+      "@alpha/types": ["packages/types/dist"],
+      "@alpha/database": ["packages/database/dist"],
+      "@alpha/auth": ["packages/auth/dist"],
+      "@alpha/entitlements": ["packages/entitlements/dist"],
+      "@alpha/billing": ["packages/billing/dist"],
+      "@alpha/analytics": ["packages/analytics/dist"],
+      "@alpha/notifications": ["packages/notifications/dist"],
+      "@alpha/integrations": ["packages/integrations/dist"],
+      "@alpha/ui": ["packages/ui/dist"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".next"]
+}

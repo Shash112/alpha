@@ -1,0 +1,35 @@
+{
+  "name": "alpha-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alpha — Digital Professional Identity & SaaS Platform Monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=apps/api\" \"npm run dev --workspace=apps/web\" \"npm run dev --workspace=apps/admin\"",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "jest",
+    "test:e2e": "npm run test:e2e --workspace=apps/web",
+    "db:migrate": "npm run migrate --workspace=packages/database",
+    "db:seed": "npm run seed --workspace=packages/database"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "bs-logger": "^0.2.6",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "jest": "^30.5.1",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.4.12",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "tailwind-merge": "^3.7.0"
+  }
+}
