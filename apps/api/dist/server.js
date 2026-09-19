@@ -1123,6 +1123,38 @@ function createServer() {
             return sendError(res, 500, 'INTERNAL_SERVER_ERROR', err.message);
         }
     });
+    app.post('/api/v1/webhooks/billing/stripe', async (req, res) => {
+        try {
+            const signature = (req.headers['stripe-signature'] || req.headers['x-stripe-signature']);
+            const adapter = new billing_1.StripeAdapter();
+            const isValid = adapter.verifyWebhookSignature(JSON.stringify(req.body), signature || '', env.STRIPE_WEBHOOK_SECRET || 'whsec_mock_stripe_secret');
+            if (!isValid) {
+                return sendError(res, 400, 'WEBHOOK_VERIFICATION_FAILED', 'Invalid Stripe HMAC signature.');
+            }
+            const eventId = req.body.id || req.body.event_id || `evt_stripe_${crypto_1.default.randomBytes(8).toString('hex')}`;
+            const existing = await (0, database_1.query)('SELECT id FROM billing_webhook_deliveries WHERE provider_event_id = $1', [eventId]);
+            if (existing.rowCount && existing.rowCount > 0) {
+                return res.status(200).json({ status: 'PROCESSED', message: 'Event already processed idempotently.' });
+            }
+            const eventType = req.body.type || req.body.event || 'checkout.session.completed';
+            const objectData = req.body.data?.object || req.body.payload || {};
+            const workspaceId = objectData.client_reference_id || objectData.metadata?.workspace_id || objectData.workspaceId;
+            const planId = objectData.metadata?.plan_id || objectData.planId || 'plan_personal_pro';
+            const providerSubId = objectData.subscription || objectData.id || `sub_stripe_${crypto_1.default.randomBytes(8).toString('hex')}`;
+            if (workspaceId) {
+                await (0, database_1.query)(`INSERT INTO subscriptions (workspace_id, plan_id, provider, provider_subscription_id, status, current_period_start, current_period_end)
+           VALUES ($1, $2, 'STRIPE', $3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 year')
+           ON CONFLICT (workspace_id)
+           DO UPDATE SET plan_id = $2, provider = 'STRIPE', provider_subscription_id = $3, status = 'ACTIVE', current_period_start = CURRENT_TIMESTAMP, current_period_end = CURRENT_TIMESTAMP + INTERVAL '1 year'`, [workspaceId, planId, providerSubId]);
+            }
+            await (0, database_1.query)(`INSERT INTO billing_webhook_deliveries (provider, provider_event_id, event_type, payload, status)
+         VALUES ('STRIPE', $1, $2, $3, 'PROCESSED')`, [eventId, eventType, JSON.stringify(req.body)]);
+            return res.status(200).json({ status: 'SUCCESS', eventId });
+        }
+        catch (err) {
+            return sendError(res, 500, 'INTERNAL_SERVER_ERROR', err.message);
+        }
+    });
     app.post('/api/v1/webhooks/billing/razorpay', async (req, res) => {
         try {
             const signature = req.headers['x-razorpay-signature'];

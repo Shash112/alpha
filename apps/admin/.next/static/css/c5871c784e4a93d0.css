@@ -1,0 +1,1 @@
+@tailwind base;@tailwind components;@tailwind utilities;body{@apply bg-slate-950 text-slate-100 antialiased}.glass-panel{background:rgba(15,23,42,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid hsla(0,0%,100%,.1)}
