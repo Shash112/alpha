@@ -1,194 +1,128 @@
 # 36 — Master Implementation Plan
 
-**Document Version:** 1.0  
-**Status:** Approved Technical Architecture  
-**Scope:** Complete 15-Phase Execution Plan for Prompt 2 (Full Production Implementation)  
+**Document Version:** 2.0 (Global Mandate & Vertical Slice Priority)  
+**Status:** Approved Technical Architecture Blueprint  
+**Scope:** Complete Execution Plan for Full Production Implementation  
 
 ---
 
 ## Executive Implementation Strategy
 
-This document outlines the **Complete Production Implementation Blueprint** to be executed by **Prompt 2**. Implementation is structured into 15 logical execution phases to ensure systematic, dependency-ordered delivery of the entire Alpha SaaS platform.
-
-> **CRITICAL RULE FOR PROMPT 2:** Prompt 2 MUST implement ALL 15 phases end-to-end. Prompt 2 MUST NOT stop after Phase 1, Phase 2, or an MVP state.
+This document outlines the **Master Implementation Blueprint**. Implementation is structured to deliver a **High-Confidence Vertical Slice First** — a complete, secure, polished, and purchasable core experience (Personal Digital Card creation, live preview, sub-100ms public rendering, multi-currency Stripe + Razorpay billing checkout, lead capture, and workspace management) before expanding into teams, CRM, white-labeling, and reseller portals.
 
 ---
 
-## Execution Phase Directory
+## Strategic Phase Structure
 
-### Phase 0: Workspace Repository & Monorepo Foundation
-- **Objective:** Establish monorepo workspace structure, packages, build tooling, Docker local setup, and base configuration.
-- **Dependencies:** None.
-- **Tasks:**
-  - Initialize pnpm/npm monorepo workspace (`apps/web`, `apps/api`, `apps/admin`, `packages/*`).
-  - Configure TypeScript `tsconfig.json` base, ESLint, Prettier, and Tailwind CSS design tokens.
-  - Setup Docker Compose with PostgreSQL 16, Redis 7, and S3-compatible LocalStack.
-  - Implement Environment Variable Zod schema validator (`packages/config`).
-- **Acceptance Criteria:** Monorepo builds cleanly; Docker environment starts PostgreSQL and Redis; shared config packages resolve properly.
+```text
+PHASE 1: HIGH-CONFIDENCE VERTICAL SLICE (Core Purchasable Experience)
+  ├── 1.1 Monorepo & Global Configuration Foundation
+  ├── 1.2 Authentication, User Identity & i18n Posture
+  ├── 1.3 Tenant Workspaces, Isolation & RBAC Engine
+  ├── 1.4 Digital Card Engine, Builder & Live Preview
+  ├── 1.5 Public Profile Subsystem & URL Identity (Sub-100ms CDN)
+  ├── 1.6 Multi-Currency Billing Engine (Stripe + Razorpay Strategy, Checkout & Webhooks)
+  └── 1.7 Lead Capture & Email Notifications
 
----
+PHASE 2: ORGANIZATION, QR/NFC & GROWTH SLICE
+  ├── 2.1 Dynamic QR Code & Physical NFC Tag Management
+  ├── 2.2 CRM Lite, Lead Management Pipeline & vCard Export
+  ├── 2.3 Asynchronous Analytics & Event Reporting
+  ├── 2.4 Corporate Teams, Departments & Employee Onboarding
+  └── 2.5 Native Appointment Booking & 2-Way Networking Exchange
 
-### Phase 1: Core Identity, Authentication & User Management
-- **Objective:** Implement user registration, email verification, password reset, JWT/Session authentication, and user profile management.
-- **Dependencies:** Phase 0.
-- **Tasks:**
-  - Database migrations for `users`, `auth_identities`, `sessions`.
-  - Implement `IdentityService` with Argon2id password hashing and JWT access/refresh token generation.
-  - Build Auth API endpoints (`/api/v1/auth/*`) with rate limiting guards.
-  - Build Auth UI screens (Login, Register, Forgot Password, Profile Settings).
-- **Acceptance Criteria:** User can register, verify email, log in, manage profile, and receive valid JWT tokens. Unit & integration tests passing.
-
----
-
-### Phase 2: Workspaces, Multi-Tenancy & RBAC Engine
-- **Objective:** Implement tenant workspace isolation, workspace types, membership management, invitation flows, and RBAC permission guards.
-- **Dependencies:** Phase 1.
-- **Tasks:**
-  - Database migrations for `workspaces`, `workspace_memberships`, `roles`, `permissions`, `role_permissions`.
-  - Implement `TenantContextMiddleware` and `TenantAuthorizationGuard`.
-  - Build Workspace API (`/api/v1/workspaces/*`) and Member Invitation flow.
-  - Build Workspace Switcher & Member Management UI in dashboard.
-- **Acceptance Criteria:** User can create workspaces, invite team members, assign roles, switch active workspaces. Cross-tenant access denial integration tests passing.
+PHASE 3: RESELLER, WHITE-LABEL & ENTERPRISE SLICE
+  ├── 3.1 Custom Domains & Automated Edge SSL Routing
+  ├── 3.2 Agency & Reseller Partner Portal
+  ├── 3.3 Super-Admin Operations Console & Observability
+  └── 3.4 Enterprise Security, Audit Logs & Final Release Verification
+```
 
 ---
 
-### Phase 3: Card Aggregate, Card Builder & Revision Engine
-- **Objective:** Build digital card data aggregate, section schema model, builder UI editor, draft/published revision control.
-- **Dependencies:** Phase 2.
+## Execution Phase Details
+
+### PHASE 1: HIGH-CONFIDENCE VERTICAL SLICE (Core Purchasable Experience)
+
+#### Phase 1.1: Monorepo & Global Configuration Foundation
+- **Objective:** Establish monorepo structure, TypeScript configs, Docker environment, and global configuration schema.
 - **Tasks:**
-  - Database migrations for `cards`, `card_revisions`, `card_sections`, `templates`.
-  - Seed system template schemas (Corporate, Minimalist, Creative, Executive).
-  - Implement `CardsService` for section CRUD, revision snapshotting, and publishing workflow.
-  - Build Drag-and-Drop Card Builder UI with real-time mobile preview.
-- **Acceptance Criteria:** User can build cards, reorder sections, customize themes, save drafts, and publish revisions.
+  - Monorepo structure (`apps/web`, `apps/api`, `apps/admin`, `packages/*`).
+  - Docker Compose with PostgreSQL 16, Redis 7, and LocalStack.
+  - Zod environment validator for global billing keys (`STRIPE_SECRET_KEY`, `RAZORPAY_KEY_ID`, etc.).
+
+#### Phase 1.2: Authentication, User Identity & i18n Posture
+- **Objective:** Implement user registration, login, email verification, session security, and i18n locale/timezone posture.
+- **Tasks:**
+  - Migrations for `users`, `auth_identities`. Default locale `en-US`, timezone `UTC`.
+  - Argon2id password hashing, JWT session rotation, rate-limiting guards.
+  - UI Auth screens with polished glassmorphic styling and i18n strings.
+
+#### Phase 1.3: Tenant Workspaces, Isolation & RBAC Engine
+- **Objective:** Enforce multi-layer workspace tenant isolation, membership management, and RBAC guards.
+- **Tasks:**
+  - Migrations for `workspaces`, `workspace_memberships`, `roles`, `permissions`, `role_permissions`.
+  - Server-side `TenantContextMiddleware` and authorization guards.
+  - Cross-tenant denial security tests.
+
+#### Phase 1.4: Digital Card Engine, Builder & Live Preview
+- **Objective:** Build digital card model, template schema, section-based editor, and real-time live preview.
+- **Tasks:**
+  - Migrations for `cards`, `card_revisions`, `templates`.
+  - Drag-and-drop Card Builder UI with real-time preview (sub-50ms sync).
+  - Draft vs published revision snapshot engine.
+
+#### Phase 1.5: Public Profile Subsystem & URL Identity
+- **Objective:** Deliver sub-100ms global CDN public card rendering, canonical IDs, and vanity path resolution.
+- **Tasks:**
+  - Migrations for `aliases`. Atomic path allocation algorithm.
+  - Public Profile API with server-side visibility policy filters.
+  - Next.js Mobile-First Public Card pages with Open Graph metadata and vCard download.
+
+#### Phase 1.6: Multi-Currency Billing Engine (Stripe + Razorpay Strategy)
+- **Objective:** Implement multi-provider billing strategy pattern (`IPaymentProviderAdapter`), multi-currency pricing schemas (`USD`, `EUR`, `GBP`, `INR`), Stripe/Razorpay Checkout, and idempotent webhook handlers.
+- **Tasks:**
+  - Migrations for `plans`, `subscriptions`, `billing_webhook_deliveries`.
+  - Stripe & Razorpay webhook reconciliation with HMAC verification and idempotency keys.
+  - Multi-currency Pricing UI, Checkout Modal, and PDF Invoice generation.
+
+#### Phase 1.7: Lead Capture & Email Notifications
+- **Objective:** Build public lead capture forms on digital cards with bot protection and async email alerts.
+- **Tasks:**
+  - Public lead endpoint with rate limiting & honeypot validation.
+  - Email notification queue worker.
 
 ---
 
-### Phase 4: Public Card Engine & URL Identity Subsystem
-- **Objective:** Implement immutable Public IDs, vanity alias allocation algorithm, canonical URLs, and sanitized public card SSR rendering.
-- **Dependencies:** Phase 3.
-- **Tasks:**
-  - Database migrations for `aliases`.
-  - Implement atomic vanity alias allocation algorithm with path normalization and reserved slug checks.
-  - Build Public Profile API (`GET /api/v1/public/cards/*`) with server-side visibility policy filter.
-  - Build Next.js Mobile-First Public Card rendering pages with Open Graph SEO metadata and vCard download button.
-- **Acceptance Criteria:** `/c/:publicId` and `/:alias` resolve instantly; private fields are filtered out; vCard downloads cleanly.
+### PHASE 2: ORGANIZATION, QR/NFC & GROWTH SLICE
+
+#### Phase 2.1: Dynamic QR Code & Physical NFC Tag Subsystem
+- Dynamic QR code vector generation (PNG/SVG, custom logo overlay) and physical NFC tag activation (`/nfc/:uid`).
+
+#### Phase 2.2: CRM Lite, Lead Management Pipeline & vCard Export
+- Dashboard lead management grid, status pipeline, notes, CSV export.
+
+#### Phase 2.3: Asynchronous Analytics & Event Reporting
+- Async analytics beacon (`/api/v1/public/analytics/event`), BullMQ daily aggregate worker, performance reporting charts.
+
+#### Phase 2.4: Corporate Teams, Departments & Employee Onboarding
+- Corporate organization structure (`departments`, `teams`), bulk CSV employee onboarding, brand locking.
+
+#### Phase 2.5: Native Appointment Booking & 2-Way Networking Exchange
+- Time-slot availability generator, `.ics` calendar invite creation, mutual contact exchange handshake.
 
 ---
 
-### Phase 5: Dynamic QR Code & NFC Subsystem
-- **Objective:** Implement dynamic QR code vector generation, custom styling, NFC device mapping, and physical tap routing.
-- **Dependencies:** Phase 4.
-- **Tasks:**
-  - Database migrations for `nfc_devices`, `qr_codes`.
-  - Build QR generation service (PNG/SVG export, Level H error correction, logo overlay).
-  - Build NFC device claiming, binding, tap counter API (`GET /nfc/:deviceUid`).
-  - Build QR Download & NFC Management UI in dashboard.
-- **Acceptance Criteria:** High-res QR codes export in PNG/SVG; NFC tap routes to canonical card URL and increments counter.
+### PHASE 3: RESELLER, WHITE-LABEL & ENTERPRISE SLICE
 
----
+#### Phase 3.1: Custom Domains & Automated Edge SSL Routing
+- Edge CNAME routing middleware, automated DNS TXT verification worker, white-label brand neutrality.
 
-### Phase 6: Leads Capture & CRM Lite Subsystem
-- **Objective:** Build public lead capture forms, lead collection pipeline, lead status state machine, notes, and CSV export.
-- **Dependencies:** Phase 5.
-- **Tasks:**
-  - Database migrations for `leads`, `lead_forms`, `lead_activities`.
-  - Build Lead Capture API (`POST /api/v1/public/cards/:id/leads`) with bot protection & honeypot validation.
-  - Build CRM Lite Dashboard UI (Lead pipeline grid, status updates, notes, CSV export).
-- **Acceptance Criteria:** Visitors can submit leads on public card; card owner receives real-time lead alert; leads manage cleanly in CRM grid.
+#### Phase 3.2: Agency & Reseller Partner Portal
+- Sub-client workspace provisioning, delegated impersonation access, partner commission tracking.
 
----
+#### Phase 3.3: Super-Admin Operations Console & Observability
+- Admin console (`apps/admin`), tenant suspension tools, audit log inspector, Prometheus `/metrics` endpoint.
 
-### Phase 7: Asynchronous Analytics Engine
-- **Objective:** Implement decoupled async analytics event queue, background rollup worker, and dashboard reporting APIs.
-- **Dependencies:** Phase 6.
-- **Tasks:**
-  - Database migrations for `analytics_events` (partitioned) and `daily_analytics_aggregates`.
-  - Build lightweight beacon endpoint (`/api/v1/public/analytics/event`) pushing to Redis queue.
-  - Build BullMQ analytics rollup worker for IP hashing and daily aggregate increments.
-  - Build Analytics Dashboard UI (Views, Clicks, Scans, Taps, Geo/Device charts).
-- **Acceptance Criteria:** Analytics events record asynchronously without blocking public rendering; dashboard displays aggregate charts.
-
----
-
-### Phase 8: Organization, Departments & Employee Onboarding
-- **Objective:** Implement corporate organization tree, departments, teams, employee bulk CSV provisioning, and employee offboarding.
-- **Dependencies:** Phase 7.
-- **Tasks:**
-  - Database migrations for `departments`, `teams`.
-  - Build Bulk Employee CSV Import service & background worker.
-  - Implement HR brand locking rules and employee offboarding workflow.
-  - Build Department & Team Management UI.
-- **Acceptance Criteria:** HR admin can upload CSV to provision 50 employee cards; corporate branding is locked; offboarded employee cards archive properly.
-
----
-
-### Phase 9: Plans, Entitlements & Razorpay Billing Engine
-- **Objective:** Implement configuration-driven entitlement engine, commercial plan matrix, Razorpay billing integration, webhooks, and subscription state machine.
-- **Dependencies:** Phase 8.
-- **Tasks:**
-  - Database migrations for `plans`, `subscriptions`, `invoices`, `billing_webhook_deliveries`.
-  - Implement `IBillingProvider` and `RazorpayAdapter`.
-  - Build Entitlement Engine (`entitlementService.canAccessFeature(...)`) with Redis resolution caching.
-  - Build Razorpay Webhook Handler with HMAC signature verification & idempotency.
-  - Build Billing Dashboard UI (Plan selection, Razorpay Checkout Modal, Invoices).
-- **Acceptance Criteria:** User can upgrade plan via Razorpay; webhooks update subscription status idempotently; feature entitlements unlock instantly.
-
----
-
-### Phase 10: Appointments & Networking Subsystems
-- **Objective:** Implement native appointment booking engine, availability schedules, time-slot generation, and explicit 2-way card connection swap.
-- **Dependencies:** Phase 9.
-- **Tasks:**
-  - Database migrations for `appointment_types`, `availability_schedules`, `appointments`, `user_connections`.
-  - Build real-time time-slot generator and booking submit API with `.ics` calendar generation.
-  - Build 2-way contact exchange handshake flow.
-  - Build Appointments & Networking UI.
-- **Acceptance Criteria:** Visitors can view available slots and book appointments; card owners receive `.ics` email alerts; networking connection swap works mutually.
-
----
-
-### Phase 11: Custom Domains & White-Label Subsystem
-- **Objective:** Implement CNAME custom domain routing, automated SSL provisioning worker, custom brand styling, and custom email domains.
-- **Dependencies:** Phase 10.
-- **Tasks:**
-  - Database migrations for `custom_domains`.
-  - Build Next.js Edge Middleware for custom hostname routing.
-  - Build Domain Verification DNS TXT checker worker.
-  - Build White-Label UI Settings (Favicon upload, brand neutral toggle, custom CSS tokens).
-- **Acceptance Criteria:** Custom CNAME `card.acme.com` routes correctly; DNS TXT verification worker activates domain; platform branding is hidden when enabled.
-
----
-
-### Phase 12: Agency & Reseller Platform
-- **Objective:** Implement partner agency workspaces, sub-client workspace creation, delegated access control, and commission tracking.
-- **Dependencies:** Phase 11.
-- **Tasks:**
-  - Database migrations for `reseller_accounts`, `reseller_clients`, `commissions`.
-  - Build Reseller Portal APIs & Delegated Access impersonation tokens.
-  - Build Partner Portal UI (Client management, seat quota allocation, commission dashboard).
-- **Acceptance Criteria:** Agency can provision client sub-workspaces, switch into client dashboard with auditable delegated tokens, and track commission share.
-
----
-
-### Phase 13: Platform Admin Dashboard & Observability
-- **Objective:** Build super-admin platform console, tenant management, global template editor, abuse suspension tools, and observability integration.
-- **Dependencies:** Phase 12.
-- **Tasks:**
-  - Build `apps/admin` application.
-  - Build Admin APIs for global user/workspace lookup, card suspension, plan configuration, and audit log inspection.
-  - Setup Pino JSON logging with correlation IDs, Prometheus `/metrics` endpoint, and Sentry error tracking.
-- **Acceptance Criteria:** Super-admins can suspend abusive cards, monitor platform metrics, and inspect tenant audit logs.
-
----
-
-### Phase 14: Final System Verification, Security Audit & Production Release
-- **Objective:** Execute full automated test suite, security denial tests, E2E Playwright tests, static analysis, and verify production deployment artifacts.
-- **Dependencies:** Phase 13.
-- **Tasks:**
-  - Execute full unit & integration test suite (`npm test`).
-  - Execute cross-tenant security denial tests & billing idempotency tests.
-  - Execute E2E Playwright test suite (`npm run test:e2e`).
-  - Build production Docker containers and verify Terraform HCL manifests.
-  - Generate final Requirement Traceability Matrix report.
-- **Acceptance Criteria:** 100% of planned functional and architectural requirements verified; 0 failing tests; zero lint/type errors.
+#### Phase 3.4: Enterprise Security, Audit Logs & Final Release Verification
+- Full test suite execution, OWASP vulnerability audit, Playwright E2E verification, production deployment packaging.

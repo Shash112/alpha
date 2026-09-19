@@ -12,7 +12,7 @@ import {
   extractTenantContext
 } from '@alpha/auth';
 import { EntitlementEngine } from '@alpha/entitlements';
-import { RazorpayAdapter } from '@alpha/billing';
+import { getBillingAdapter, StripeAdapter, RazorpayAdapter } from '@alpha/billing';
 import { AnalyticsCollector } from '@alpha/analytics';
 import { NotificationDispatcher } from '@alpha/notifications';
 import { IntegrationService } from '@alpha/integrations';
@@ -1114,7 +1114,7 @@ export function createServer() {
   // ==========================================
   app.get('/api/v1/workspaces/:workspaceId/billing/plans', async (req: Request, res: Response) => {
     try {
-      const plansRes = await query('SELECT id, family, name, billing_period, price_inr, entitlements_schema FROM plans WHERE is_active = TRUE ORDER BY price_inr ASC');
+      const plansRes = await query('SELECT id, family, name, billing_period, price_inr, prices_schema, entitlements_schema FROM plans WHERE is_active = TRUE ORDER BY price_inr ASC');
       return res.status(200).json({ data: plansRes.rows });
     } catch (err: any) {
       return sendError(res, 500, 'INTERNAL_SERVER_ERROR', err.message);
@@ -1123,21 +1123,24 @@ export function createServer() {
 
   app.post('/api/v1/workspaces/:workspaceId/billing/checkout', requireAuth, requireTenant, async (req: any, res: Response) => {
     try {
-      const { planId } = req.body;
-      const rzp = new RazorpayAdapter();
-      const subResult = await rzp.createSubscription({
+      const { planId, provider, currency } = req.body;
+      const targetProvider = (provider || 'STRIPE').toUpperCase();
+      const adapter = getBillingAdapter(targetProvider);
+      
+      const subResult = await adapter.createSubscription({
         workspaceId: req.tenantContext.workspaceId,
         planId,
         customerEmail: req.user.email,
-        customerName: req.user.email
+        customerName: req.user.email,
+        currency: currency || 'USD'
       });
 
       await query(
         `INSERT INTO subscriptions (workspace_id, plan_id, provider, provider_subscription_id, status, current_period_start, current_period_end)
-         VALUES ($1, $2, 'RAZORPAY', $3, 'ACTIVE', $4, $5)
+         VALUES ($1, $2, $3, $4, 'ACTIVE', $5, $6)
          ON CONFLICT (workspace_id)
-         DO UPDATE SET plan_id = $2, provider_subscription_id = $3, status = 'ACTIVE', current_period_start = $4, current_period_end = $5`,
-        [req.tenantContext.workspaceId, planId, subResult.providerSubscriptionId, subResult.currentPeriodStart, subResult.currentPeriodEnd]
+         DO UPDATE SET plan_id = $2, provider = $3, provider_subscription_id = $4, status = 'ACTIVE', current_period_start = $5, current_period_end = $6`,
+        [req.tenantContext.workspaceId, planId, targetProvider, subResult.providerSubscriptionId, subResult.currentPeriodStart, subResult.currentPeriodEnd]
       );
 
       await recordAuditLog({

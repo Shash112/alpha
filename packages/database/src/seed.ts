@@ -38,6 +38,7 @@ export async function seedDatabase(): Promise<void> {
       name: 'Free Personal Plan',
       billing_period: 'ANNUAL',
       price_inr: 0,
+      prices: { USD: 0, EUR: 0, GBP: 0, INR: 0, CAD: 0, AUD: 0 },
       entitlements: {
         'cards.max_active_count': 1,
         'members.max_seats': 1,
@@ -54,7 +55,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Personal Pro',
       name: 'Personal Pro Plan',
       billing_period: 'ANNUAL',
-      price_inr: 49900, // ₹499.00 / year
+      price_inr: 49900,
+      prices: { USD: 4900, EUR: 4500, GBP: 3900, INR: 49900, CAD: 6500, AUD: 6900 }, // $49.00 / year
       entitlements: {
         'cards.max_active_count': 5,
         'members.max_seats': 1,
@@ -71,7 +73,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Team',
       name: 'Team Plan',
       billing_period: 'ANNUAL',
-      price_inr: 299900, // ₹2999.00 / year
+      price_inr: 299900,
+      prices: { USD: 19900, EUR: 18500, GBP: 15900, INR: 299900, CAD: 26900, AUD: 28900 }, // $199.00 / year
       entitlements: {
         'cards.max_active_count': 25,
         'members.max_seats': 10,
@@ -88,7 +91,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Business',
       name: 'Business Plan',
       billing_period: 'ANNUAL',
-      price_inr: 999900, // ₹9999.00 / year
+      price_inr: 999900,
+      prices: { USD: 49900, EUR: 46900, GBP: 39900, INR: 999900, CAD: 67900, AUD: 72900 }, // $499.00 / year
       entitlements: {
         'cards.max_active_count': 100,
         'members.max_seats': 50,
@@ -105,10 +109,10 @@ export async function seedDatabase(): Promise<void> {
 
   for (const plan of plans) {
     await query(
-      `INSERT INTO plans (id, family, name, billing_period, price_inr, entitlements_schema)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (id) DO UPDATE SET price_inr = $5, entitlements_schema = $6`,
-      [plan.id, plan.family, plan.name, plan.billing_period, plan.price_inr, JSON.stringify(plan.entitlements)]
+      `INSERT INTO plans (id, family, name, billing_period, price_inr, prices_schema, entitlements_schema)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (id) DO UPDATE SET price_inr = $5, prices_schema = $6, entitlements_schema = $7`,
+      [plan.id, plan.family, plan.name, plan.billing_period, plan.price_inr, JSON.stringify(plan.prices), JSON.stringify(plan.entitlements)]
     );
   }
 

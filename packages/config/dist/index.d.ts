@@ -13,6 +13,9 @@ export declare const EnvSchema: z.ZodObject<{
     S3_ENDPOINT: z.ZodOptional<z.ZodString>;
     S3_ACCESS_KEY_ID: z.ZodDefault<z.ZodString>;
     S3_SECRET_ACCESS_KEY: z.ZodDefault<z.ZodString>;
+    STRIPE_SECRET_KEY: z.ZodDefault<z.ZodString>;
+    STRIPE_PUBLISHABLE_KEY: z.ZodDefault<z.ZodString>;
+    STRIPE_WEBHOOK_SECRET: z.ZodDefault<z.ZodString>;
     RAZORPAY_KEY_ID: z.ZodDefault<z.ZodString>;
     RAZORPAY_KEY_SECRET: z.ZodDefault<z.ZodString>;
     RAZORPAY_WEBHOOK_SECRET: z.ZodDefault<z.ZodString>;
@@ -33,6 +36,9 @@ export declare const EnvSchema: z.ZodObject<{
     S3_ENDPOINT?: string;
     S3_ACCESS_KEY_ID?: string;
     S3_SECRET_ACCESS_KEY?: string;
+    STRIPE_SECRET_KEY?: string;
+    STRIPE_PUBLISHABLE_KEY?: string;
+    STRIPE_WEBHOOK_SECRET?: string;
     RAZORPAY_KEY_ID?: string;
     RAZORPAY_KEY_SECRET?: string;
     RAZORPAY_WEBHOOK_SECRET?: string;
@@ -53,6 +59,9 @@ export declare const EnvSchema: z.ZodObject<{
     S3_ENDPOINT?: string;
     S3_ACCESS_KEY_ID?: string;
     S3_SECRET_ACCESS_KEY?: string;
+    STRIPE_SECRET_KEY?: string;
+    STRIPE_PUBLISHABLE_KEY?: string;
+    STRIPE_WEBHOOK_SECRET?: string;
     RAZORPAY_KEY_ID?: string;
     RAZORPAY_KEY_SECRET?: string;
     RAZORPAY_WEBHOOK_SECRET?: string;
@@ -68,7 +77,9 @@ export declare const SYSTEM_CONSTANTS: {
     DEFAULT_LOCALE: string;
     DEFAULT_TIMEZONE: string;
     DEFAULT_CURRENCY: string;
+    SUPPORTED_CURRENCIES: readonly ["USD", "EUR", "GBP", "INR", "CAD", "AUD"];
     PAISE_PER_RUPEE: number;
+    CENTS_PER_DOLLAR: number;
     RESERVED_SLUGS: string[];
     PASSWORD_SALT_ROUNDS: number;
     ACCOUNT_DELETION_GRACE_DAYS: number;

@@ -1,10 +1,10 @@
 # Digital Visiting Card SaaS — Full Development Requirements
 
 **Document:** Master Product & Development Requirements
-**Version:** 1.0
-**Status:** Development Baseline
+**Version:** 2.0 (Global Repositioning & Robustness Mandate)
+**Status:** Binding Development Baseline
 **Product Type:** Multi-tenant SaaS
-**Primary Market:** India-first, globally extensible
+**Primary Market:** Global from day one
 
 ---
 
@@ -12,49 +12,52 @@
 
 ### 1.1 Product Vision
 
-Build a production-grade, multi-tenant SaaS platform that starts as a digital visiting card product and expands into a professional digital identity, lead capture, networking, lightweight CRM, team identity management, NFC/QR management, business profiles, appointment booking, analytics, reseller, and white-label platform.
+Build a production-grade, multi-tenant SaaS platform that starts as a digital visiting card product and expands into a professional digital identity, lead capture, networking, lightweight CRM, team identity management, NFC/QR management, business profiles, appointment booking, analytics, reseller, and white-label platform suitable for global commercial deployment.
 
 ### 1.2 Core Product Promise
 
-> Create your professional identity once, share it everywhere, and turn introductions into contacts, conversations, and leads.
+> Create your professional identity once, share it everywhere, and turn introductions into contacts, conversations, and leads globally.
 
 ### 1.3 Product Positioning
 
-The product must not be implemented as only a QR-card generator. The platform must be designed as a reusable digital identity and business networking platform with the digital visiting card as its primary entry point.
+The product must not be implemented as only a QR-card generator or regional utility. The platform is architected as a global, premium digital identity and business networking platform with the digital visiting card as its primary entry point.
 
 ### 1.4 Primary Customer Segments
 
-1. Individual professionals.
-2. Freelancers and consultants.
+1. Global individual professionals.
+2. Freelancers and international consultants.
 3. Real-estate professionals.
-4. Insurance and financial professionals.
-5. Sales professionals.
-6. Agencies.
-7. Small businesses.
+4. Insurance and financial advisors.
+5. Global sales professionals.
+6. Marketing & digital agencies.
+7. Small & medium businesses worldwide.
 8. Dealer/distributor networks.
 9. Service businesses.
-10. Companies with employee/sales teams.
-11. Enterprise organizations.
-12. Agencies, printing companies, NFC vendors, and other resellers.
+10. Multi-national companies with employee/sales teams.
+11. Enterprise organizations needing SSO, compliance, and custom domains.
+12. Global agencies, printing partners, NFC vendors, and white-label resellers.
 
 ---
 
 # 2. Product Principles
 
-1. Mobile-first public card experience.
-2. Production-ready architecture from the beginning; no throwaway MVP architecture.
-3. Multi-tenant by design.
-4. Workspace/organization-centric authorization.
-5. Plans and entitlements must be configuration-driven, not hardcoded.
-6. Individual, Team, Organization, Enterprise, and Reseller must use one coherent platform architecture.
-7. Public profiles expose only explicitly published information.
-8. Every important action must be observable and auditable.
-9. APIs must be versioned and documented.
-10. All business-critical operations must be idempotent where appropriate.
-11. Payment provider logic must be abstracted behind a billing layer.
-12. Feature access must be enforced on the server, never only in the UI.
-13. The system must support future custom domains, white-labeling, regional pricing, add-ons, and enterprise contracts.
-14. Avoid premature microservices; use a modular monolith unless operational evidence justifies extraction.
+1. Global-first architecture, UI, multi-currency billing, and i18n posture from day one.
+2. Mobile-first public card experience with sub-100ms global CDN projection.
+3. Production-ready reliability, strict security, and premium perceived quality; zero MVP shortcuts or placeholder pages.
+4. Multi-tenant by design with multi-layer tenant isolation (API, DB context, memory, background jobs).
+5. Workspace/organization-centric authorization and RBAC governance.
+6. Plans, pricing, entitlements, and feature flags must be strictly configuration-driven without hardcoded values.
+7. Individual, Team, Organization, Enterprise, and Reseller use one coherent modular monolith architecture.
+8. Public profiles expose only explicitly published information server-side.
+9. Transparent, trustworthy billing with multi-provider abstraction (Stripe + Razorpay + PayPal), multi-currency support (USD, EUR, GBP, INR, etc.), and idempotent webhooks.
+10. Every important action must be observable, auditable, and traceable via correlation IDs.
+11. APIs must be versioned (`/api/v1`) and documented with OpenAPI schemas.
+12. All business-critical operations must be idempotent and fault-tolerant.
+13. Payment provider logic must be abstracted behind a multi-gateway billing abstraction layer.
+14. Feature access must be strictly enforced on the server, never solely in the UI.
+15. Support custom domains with automated SSL, white-labeling, regional pricing add-ons, and enterprise SLAs.
+16. Avoid premature microservices; use a clean modular monolith unless operational evidence justifies extraction.
+17. Full compliance readiness (GDPR, CCPA, SOC2 security standards) with automated privacy controls.
 
 ---
 

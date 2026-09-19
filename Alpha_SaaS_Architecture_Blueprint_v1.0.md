@@ -1,10 +1,10 @@
 # Alpha — SaaS Architecture Blueprint
 
 **Document:** Alpha System & SaaS Architecture Blueprint  
-**Version:** 1.0  
+**Version:** 2.0 (Global Mandate)  
 **Status:** Architecture Baseline — Locked for Development  
 **Product Type:** Multi-tenant SaaS  
-**Market:** India-first, globally extensible  
+**Market:** Global from day one  
 **Internal Project Name:** Alpha  
 **Primary Product:** Digital Professional Identity / Digital Visiting Card SaaS
 
@@ -24,10 +24,10 @@ This document is the architectural source of truth for:
 - database responsibilities and constraints;
 - API contracts and conventions;
 - asynchronous processing;
-- billing and subscription behavior;
+- multi-currency billing and multi-provider subscription behavior;
 - public URL and card identity behavior;
 - infrastructure and deployment;
-- security and observability;
+- security, privacy compliance, and observability;
 - testing strategy;
 - implementation rules for AI development agents.
 
@@ -51,31 +51,32 @@ Card identity uses an immutable internal identifier and a separate immutable pub
 
 # 2. Non-Negotiable Architectural Principles
 
-1. Multi-tenancy is a foundational architecture rule, not a later feature.
-2. A user is never synonymous with a tenant.
-3. A workspace is the primary customer/resource isolation boundary.
-4. A user may belong to multiple workspaces.
-5. A workspace may contain multiple cards.
-6. Account/workspace type and commercial plan are separate concepts.
-7. Plan logic must be configuration-driven.
-8. Feature access must be enforced server-side.
-9. Roles and permissions are independent of plans.
-10. Public card fields must never expose unpublished/private data.
-11. Card identity must not depend on a person's display name.
-12. Slugs are aliases; immutable IDs are resource identity.
-13. Database constraints are authoritative for uniqueness and integrity.
-14. Payment-provider APIs must be hidden behind a billing abstraction.
-15. Analytics must not become a synchronous dependency of public-card rendering.
-16. Background jobs must be retryable and idempotent where appropriate.
-17. Cross-tenant access must fail closed.
-18. All privileged operational actions must be auditable.
-19. No customer-specific code forks are permitted.
-20. Customer-specific behavior must be implemented through configuration, entitlements, branding, templates, and data.
-21. The public-card path must be optimized independently from dashboard workloads.
-22. APIs must be versioned and documented through OpenAPI.
-23. Production changes must be observable and reversible where practical.
-24. Security controls are part of feature completion, not a separate final task.
-25. Do not introduce microservices until operational evidence justifies extraction.
+1. Global-first posture, multi-currency pricing, multi-language readiness (i18n), and global compliance from day one.
+2. Multi-tenancy is a foundational architecture rule, not a later feature.
+3. A user is never synonymous with a tenant.
+4. A workspace is the primary customer/resource isolation boundary.
+5. A user may belong to multiple workspaces.
+6. A workspace may contain multiple cards.
+7. Account/workspace type and commercial plan are separate concepts.
+8. Plan logic must be configuration-driven and support multi-currency pricing schemas.
+9. Feature access must be enforced server-side.
+10. Roles and permissions are independent of plans.
+11. Public card fields must never expose unpublished/private data.
+12. Card identity must not depend on a person's display name.
+13. Slugs are aliases; immutable IDs are resource identity.
+14. Database constraints are authoritative for uniqueness and integrity.
+15. Payment-provider APIs must be hidden behind a multi-gateway billing abstraction (Stripe + Razorpay + PayPal).
+16. Analytics must not become a synchronous dependency of public-card rendering.
+17. Background jobs must be retryable and idempotent where appropriate.
+18. Cross-tenant access must fail closed.
+19. All privileged operational actions must be auditable.
+20. No customer-specific code forks are permitted.
+21. Customer-specific behavior must be implemented through configuration, entitlements, branding, templates, and data.
+22. The public-card path must be optimized independently from dashboard workloads (sub-100ms CDN projection).
+23. APIs must be versioned and documented through OpenAPI.
+24. Production changes must be observable and reversible where practical.
+25. Security controls are part of feature completion, not a separate final task.
+26. Do not introduce microservices until operational evidence justifies extraction.
 
 ---
 
@@ -107,8 +108,9 @@ Card identity uses an immutable internal identifier and a separate immutable pub
 
 ## 3.4 Payments
 
-- Initial provider: Razorpay
-- Provider abstraction: mandatory
+- Primary global provider: Stripe
+- Regional/Alternative providers: Razorpay, PayPal
+- Provider abstraction: mandatory multi-gateway billing strategy pattern (`IPaymentProviderAdapter`)
 
 ## 3.5 Repository
 

@@ -167,6 +167,8 @@ export interface LeadDto {
 // ==========================================
 // 5. BILLING & ENTITLEMENT TYPES
 // ==========================================
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'INR' | 'CAD' | 'AUD';
+export type PaymentProvider = 'STRIPE' | 'RAZORPAY' | 'PAYPAL' | 'INTERNAL';
 export type BillingPeriod = 'MONTHLY' | 'ANNUAL';
 export type SubscriptionStatus = 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'UNPAID' | 'CANCELLED' | 'HALTED';
 
@@ -175,7 +177,8 @@ export interface PlanDto {
   family: string;
   name: string;
   billingPeriod: BillingPeriod;
-  priceInr: number; // Stored in paise
+  prices: Record<Currency, number>; // Amount in smallest currency units (cents/paise)
+  priceInr?: number; // Legacy backwards-compatibility helper
   entitlements: Record<string, any>;
 }
 
@@ -183,7 +186,7 @@ export interface SubscriptionDto {
   id: string;
   workspaceId: string;
   planId: string;
-  provider: string;
+  provider: PaymentProvider | string;
   providerSubscriptionId: string;
   status: SubscriptionStatus;
   currentPeriodStart: string;

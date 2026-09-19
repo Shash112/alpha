@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
     display_name VARCHAR(200) NOT NULL,
     avatar_url TEXT,
     phone VARCHAR(32),
-    locale VARCHAR(10) DEFAULT 'en-IN',
-    timezone VARCHAR(50) DEFAULT 'Asia/Kolkata',
+    locale VARCHAR(10) DEFAULT 'en-US',
+    timezone VARCHAR(50) DEFAULT 'UTC',
     status VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -216,7 +216,8 @@ CREATE TABLE IF NOT EXISTS plans (
     family VARCHAR(32) NOT NULL,
     name VARCHAR(100) NOT NULL,
     billing_period VARCHAR(16) NOT NULL,
-    price_inr INT NOT NULL,
+    prices_schema JSONB NOT NULL DEFAULT '{"USD": 0, "EUR": 0, "GBP": 0, "INR": 0}',
+    price_inr INT NOT NULL DEFAULT 0,
     entitlements_schema JSONB NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -225,7 +226,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id UUID NOT NULL UNIQUE REFERENCES workspaces(id) ON DELETE CASCADE,
     plan_id VARCHAR(64) NOT NULL REFERENCES plans(id),
-    provider VARCHAR(32) NOT NULL DEFAULT 'RAZORPAY',
+    provider VARCHAR(32) NOT NULL DEFAULT 'STRIPE',
     provider_subscription_id VARCHAR(128) NOT NULL UNIQUE,
     status VARCHAR(32) NOT NULL,
     current_period_start TIMESTAMPTZ NOT NULL,
@@ -280,7 +281,7 @@ CREATE TABLE IF NOT EXISTS availability_schedules (
     day_of_week INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    timezone VARCHAR(50) NOT NULL DEFAULT 'Asia/Kolkata'
+    timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'
 );
 
 CREATE TABLE IF NOT EXISTS appointments (
@@ -348,7 +349,8 @@ CREATE TABLE IF NOT EXISTS commissions (
     reseller_workspace_id UUID NOT NULL REFERENCES workspaces(id),
     client_workspace_id UUID NOT NULL REFERENCES workspaces(id),
     invoice_id UUID NOT NULL,
-    amount_inr INT NOT NULL,
+    amount_cents INT NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
     status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
