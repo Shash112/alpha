@@ -1321,19 +1321,19 @@ Architecture must support:
 
 ## 25.4 Payment Provider Abstraction
 
-Create a provider abstraction layer.
+Create a provider abstraction layer (`IPaymentProviderAdapter`).
 
-Initial provider for India may be Razorpay, but application services must not directly depend on provider-specific APIs.
+Stripe is the primary global payment provider from day one, with Razorpay and PayPal integrated as regional adapters. Application services MUST NOT directly depend on provider-specific SDK methods.
 
 Example:
 
 ```text
 Billing Service
    ↓
-Payment Provider Interface
-   ├── Razorpay
-   ├── Future Provider A
-   └── Future Provider B
+IPaymentProviderAdapter Interface
+   ├── StripeAdapter (Primary Global)
+   ├── RazorpayAdapter (Regional / India)
+   └── PayPalAdapter (Regional / Alternative)
 ```
 
 ## 25.5 Subscription States
@@ -1920,7 +1920,7 @@ Recommended technology direction:
 - Cache/queues: Redis.
 - Object storage: S3-compatible.
 - CDN/WAF: Cloudflare or equivalent.
-- Payments: provider abstraction with Razorpay initial support.
+- Payments: provider abstraction with Stripe as primary global gateway, plus Razorpay and PayPal adapters.
 .
 
 Technology may be changed during technical design only if the same requirements are preserved or improved.
@@ -2092,25 +2092,23 @@ Requirements:
 - Time zones.
 - Localized email templates.
 
-Initial language may be English, with future support for Indian languages.
+Default language is English (en-US), with full i18n support for global locale expansion.
 
 ---
 
-# 47. India-First Requirements
+# 47. Global Readiness & Regional Adaptations
 
-The initial commercial experience should support:
+The global commercial baseline requires:
 
-- INR.
-- Indian phone number formats.
-- +91 display/validation.
-- UPI-capable payment flow through supported gateway.
-- GST/business tax fields where relevant.
-- Indian address conventions.
-- WhatsApp-first sharing.
-- QR-first networking.
-- India-focused pricing configuration.
-
-Do not make the underlying architecture India-only.
+- Primary currency: USD (with multi-currency support for EUR, GBP, INR, CAD, AUD stored in standard 64-bit integer units).
+- Stripe as primary payment gateway, with Razorpay (UPI/INR) and PayPal available as regional billing adapters.
+- E.164 international phone number validation and display formatting.
+- Global tax compliance (VAT, Sales Tax, GST) configured dynamically per market.
+- Multi-language readiness (English primary default with i18n translation framework for Spanish, French, German, Hindi).
+- ISO 3166-1 alpha-2 country and regional address formatting.
+- Universal sharing options (Email, vCard, QR, NFC, LinkedIn, WhatsApp).
+- Configuration-driven regional pricing and currency switching.
+- Full compliance with [PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md](file:///c:/Users/Shashanka.AzureAD/Desktop/Projects/WLS/alpha/docs/architecture/PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md).
 
 ---
 
@@ -2694,7 +2692,7 @@ Billing must support:
 - Regional plans.
 .
 
-India should be first supported region, but schema must not assume India-only taxation.
+Global tax handling (VAT, Sales Tax, GST) must be configuration-driven and calculated dynamically based on billing country.
 
 ---
 
@@ -2820,7 +2818,7 @@ This is a full-product build, but implementation must be staged to manage comple
 - Plans.
 - Entitlements.
 - Billing.
-- Razorpay integration.
+- Stripe & multi-gateway billing integration.
 - Coupons.
 - Add-ons.
 - Trials.
@@ -3203,7 +3201,7 @@ The finished platform should conceptually operate as follows:
 15. Keep all sensitive operational actions auditable.
 16. Prefer a modular monolith until scale requires service extraction.
 17. Build APIs so future web/mobile clients can consume the same capabilities.
-18. Keep India-specific commercial functionality configurable rather than hardcoded into domain logic.
+18. Keep market-specific and regional commercial functionality configurable rather than hardcoded into domain logic.
 19. Use automated tests for tenant isolation, permissions, billing, and critical public-card flows.
 20. Every release must pass security, billing, regression, and production-readiness checks.
 

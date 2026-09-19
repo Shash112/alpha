@@ -77,6 +77,7 @@ Card identity uses an immutable internal identifier and a separate immutable pub
 24. Production changes must be observable and reversible where practical.
 25. Security controls are part of feature completion, not a separate final task.
 26. Do not introduce microservices until operational evidence justifies extraction.
+27. Strict adherence to system quality, tenant isolation, billing idempotency, and audit requirements in [PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md](file:///c:/Users/Shashanka.AzureAD/Desktop/Projects/WLS/alpha/docs/architecture/PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md).
 
 ---
 
@@ -144,13 +145,12 @@ Card identity uses an immutable internal identifier and a separate immutable pub
                                       NestJS API
                                            │
           ┌────────────────────────────────┼────────────────────────────────┐
-          │                │               │                │                │
-       Identity         Workspace       Card/Identity    CRM/Leads       Billing
-          │                │               │                │                │
-          └────────────────┴───────────────┼────────────────┴────────────────┘
+          │                │               │                │               │
+       Identity         Workspace       Card/Identity    CRM/Leads      Billing
+          │                │               │                │               │
+          └────────────────┴───────────────┼────────────────┴───────────────┘
                                            │
                                Domain Services / Policies
-                                           │
                      ┌─────────────────────┼─────────────────────┐
                      │                     │                     │
                  PostgreSQL             Redis             Object Storage
@@ -1368,13 +1368,13 @@ Usage / Limits
 ```text
 Billing Application Service
          ↓
-Payment Provider Interface
-       ┌─┴──────────────┐
-       │                │
-   Razorpay        Future Provider
+IPaymentProviderAdapter Interface
+   ┌─────┼──────────────┐
+   │     │              │
+Stripe  Razorpay     PayPal
 ```
 
-The rest of the application must not directly invoke Razorpay SDK methods.
+The rest of the application must not directly invoke provider-specific SDK methods.
 
 ## 30.2 Subscription States
 
@@ -2365,25 +2365,23 @@ Support:
 - translation keys;
 - localized notification templates.
 
-Initial UI language may be English.
+Default UI language is English (en-US) with i18n support for global locale expansion.
 
-India-specific behavior must remain configurable rather than embedded into domain rules.
+Market-specific behavior must remain configurable rather than embedded into domain rules.
 
 ---
 
-# 60. India-First Architecture
+# 60. Global-First Architecture & Localization
 
-Initial commercial behavior supports:
+The global commercial baseline architecture supports:
 
-- INR;
-- Indian phone formatting;
-- +91 handling;
-- UPI-capable payment flow through the selected payment gateway;
-- GST/tax fields where applicable;
-- Indian addresses;
-- WhatsApp-first sharing.
-
-International expansion must not require rewriting core domain models.
+- Primary currency: USD (with multi-currency support for EUR, GBP, INR, CAD, AUD stored in 64-bit integer standard units);
+- E.164 international phone number formatting and validation;
+- Global payment flow (Stripe primary + Razorpay UPI/INR + PayPal adapters);
+- Dynamic tax compliance (VAT, Sales Tax, GST) based on billing region;
+- ISO 3166-1 alpha-2 country and regional address formatting;
+- Multi-channel sharing (Email, vCard, QR, NFC, LinkedIn, WhatsApp);
+- Binding compliance with [PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md](file:///c:/Users/Shashanka.AzureAD/Desktop/Projects/WLS\alpha/docs/architecture/PREMIUM_TRUST_AND_ROBUSTNESS_STANDARDS.md).
 
 ---
 
@@ -2788,7 +2786,7 @@ This section is specifically intended to prevent architecture drift.
 - expose raw database records through public APIs;
 - bypass authorization because a route is internal-looking;
 - create a second billing abstraction;
-- call Razorpay directly from feature modules;
+- call payment gateway SDKs directly from feature modules;
 - create customer-specific code forks;
 - add a new database column to solve a feature that belongs in configuration without architecture review;
 - use user name as resource identity;
@@ -3076,10 +3074,10 @@ This future commerce capability must not be mixed into the current card domain.
 **Decision:** Plans resolve capabilities through an entitlement engine.  
 **Reason:** Enables plan changes, add-ons, promotions, grandfathering and enterprise customization without code forks.
 
-## ADR-008 — Billing Provider Abstraction
+## ADR-008 — Billing Provider Abstraction & Global Gateway Strategy
 
-**Decision:** Razorpay is the initial provider behind an abstraction.  
-**Reason:** India-first product today, multi-provider flexibility tomorrow.
+**Decision:** Stripe is the primary global payment provider, implemented behind a multi-gateway billing abstraction (`IPaymentProviderAdapter`) supporting Stripe, Razorpay, and PayPal.  
+**Reason:** Global-first product from day one with multi-currency support and regional gateway flexibility.
 
 ## ADR-009 — Async Analytics
 
@@ -3149,7 +3147,7 @@ This should be implemented centrally where practical.
 
 1. Workspace is billing owner.
 2. Subscription is provider-independent domain data.
-3. Razorpay identifiers are provider references, not system identity.
+3. Payment provider identifiers (Stripe customer/subscription IDs, Razorpay IDs) are external provider references, not internal system identity.
 4. Webhook events are idempotent.
 5. Historical invoices retain historical prices.
 6. Downgrade does not silently destroy data.
@@ -3230,7 +3228,7 @@ Although this is a full-product architecture, implementation is sequenced to red
 - entitlements;
 - usage;
 - subscriptions;
-- Razorpay;
+- Stripe & multi-gateway billing;
 - trials;
 - add-ons;
 - coupons;
@@ -3460,7 +3458,7 @@ The following have been resolved:
 - workspace model;
 - workspace-owned billing;
 - plan families;
-- Razorpay;
+- Stripe / multi-provider billing;
 - authentication baseline;
 - custom domains;
 - configuration-driven card renderer;
