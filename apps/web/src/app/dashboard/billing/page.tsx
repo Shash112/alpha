@@ -5,13 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import {
   CreditCard,
   Check,
-  Zap,
-  ShieldCheck,
-  Building,
-  Sparkles,
-  ArrowRight,
   Globe,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/apiConfig';
 
@@ -82,13 +78,12 @@ export default function BillingPage() {
     {
       id: 'plan_free_personal',
       name: 'Free Personal',
-      desc: 'Essential digital visiting card for individual professionals.',
+      desc: 'Essential digital identity card for individual professionals.',
       features: [
-        '1 Digital Identity Card',
+        '1 Published Digital Identity Card',
         'Standard QR Code Generator',
-        'Basic Contact Information',
-        'vCard (.vcf) File Export',
-        'Alpha Platform Branding'
+        'vCard (.vcf) Export',
+        'Direct Contact Links'
       ],
       cta: 'Current Plan',
       isCurrent: currentPlan === 'Free Personal',
@@ -99,14 +94,12 @@ export default function BillingPage() {
       name: 'Personal Pro',
       desc: 'Full professional identity power with lead capture & custom domains.',
       features: [
-        '5 Digital Business Cards',
-        'Custom Vanity URL Alias (alpha.com/alias)',
+        'Up to 5 Published Digital Cards',
+        'Custom Vanity URL Alias',
         'Verified Custom CNAME Domain',
         'Unlimited Lead Capture Forms',
-        'CSV Contacts Export',
-        'Real-time Click & View Analytics',
-        'Remove Alpha Platform Branding',
-        'Priority Support'
+        'CSV Lead Export',
+        'Remove Platform Branding'
       ],
       cta: 'Upgrade to Pro',
       isCurrent: currentPlan === 'Personal Pro',
@@ -115,14 +108,13 @@ export default function BillingPage() {
     {
       id: 'plan_team_annual',
       name: 'Team',
-      desc: 'Collaborative identity & card management for small teams.',
+      desc: 'Centralized card & lead management for growing teams.',
       features: [
         'Up to 25 Team Cards',
         'Centralized Team Dashboard',
-        'Unified Custom Domain Mapping',
-        'Team Member Invitations & Roles',
-        'Shared Leads & CRM Access',
-        'Brand Assets & Logo Controls'
+        'Unified Domain Mapping',
+        'Team Member Invitations',
+        'Shared Lead CRM Access'
       ],
       cta: 'Choose Team Plan',
       isCurrent: false,
@@ -130,16 +122,15 @@ export default function BillingPage() {
     },
     {
       id: 'plan_business_annual',
-      name: 'Business / Enterprise',
-      desc: 'Custom corporate digital identity, SSO, & white-label platform.',
+      name: 'Business',
+      desc: 'Custom corporate platform, SSO & white-label digital identity.',
       features: [
         'Up to 100 Corporate Cards',
         'Full White-label Branding',
-        'Single Sign-On (SAML / OIDC Ready)',
-        'Dedicated Account Manager',
-        'Custom SLA & Enterprise Security'
+        'SAML / OIDC Single Sign-On',
+        'Dedicated SLA & Support'
       ],
-      cta: 'Upgrade to Business',
+      cta: 'Choose Business Plan',
       isCurrent: false,
       highlight: false
     }
@@ -187,10 +178,10 @@ export default function BillingPage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Upgrade Success Notification Banner */}
+    <div className="space-y-8 pb-12 font-sans text-slate-900">
+      {/* Upgrade Confirmation Banner */}
       {showUpgradeSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-xs">
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-xs">
           <div className="flex items-center space-x-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
@@ -207,21 +198,21 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Page Header */}
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             Plans & Global Billing
           </h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-            Choose the right professional identity plan for your career or global business.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Select the digital identity plan that fits your professional workflow.
           </p>
         </div>
 
-        {/* Currency & Monthly/Annual Controls */}
+        {/* Currency & Billing Cycle Switchers */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm">
-            <Globe className="w-4 h-4 text-blue-600" />
+          <div className="flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs">
+            <Globe className="w-4 h-4 text-slate-500" />
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as Currency)}
@@ -236,10 +227,10 @@ export default function BillingPage() {
             </select>
           </div>
 
-          <div className="flex items-center space-x-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center space-x-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 billingCycle === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -247,12 +238,12 @@ export default function BillingPage() {
             </button>
             <button
               onClick={() => setBillingCycle('annual')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
                 billingCycle === 'annual' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <span>Annual</span>
-              <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-extrabold uppercase">
+              <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[9px] font-extrabold uppercase">
                 Save 20%
               </span>
             </button>
@@ -260,26 +251,24 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Current Subscription Status Bar */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Subscription Status Bar */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-600">
+          <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">CURRENT ACTIVE PLAN</div>
-            <div className="text-base font-extrabold text-slate-900">{currentPlan} (Active)</div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CURRENT SUBSCRIPTION</div>
+            <div className="text-sm font-extrabold text-slate-900">{currentPlan} (Active)</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 text-xs">
-          <div className="text-slate-500 font-medium">
-            Card Usage: <span className="font-bold text-slate-900">1 / 1 Available</span>
-          </div>
+        <div className="text-xs text-slate-500 font-medium">
+          Workspace Cards Limit: <span className="font-bold text-slate-900">1 / 1 Published</span>
         </div>
       </div>
 
-      {/* Commercial Plans Grid */}
+      {/* Plans Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan) => {
           const planPricing = PLAN_PRICES[plan.id]?.[currency] || { monthly: 0, annual: 0 };
@@ -291,32 +280,32 @@ export default function BillingPage() {
               key={plan.id}
               className={`bg-white rounded-2xl border p-6 flex flex-col justify-between space-y-6 relative transition-all ${
                 plan.highlight
-                  ? 'border-blue-500 shadow-xl ring-2 ring-blue-500/10'
-                  : 'border-slate-200/90 shadow-sm hover:border-slate-300'
+                  ? 'border-slate-900 shadow-md ring-1 ring-slate-900/10'
+                  : 'border-slate-200/90 shadow-xs hover:border-slate-300'
               }`}
             >
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
-                  Most Popular
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                  Popular
                 </div>
               )}
 
               <div className="space-y-4 pt-1">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
+                  <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{plan.desc}</p>
                 </div>
 
                 <div className="flex items-baseline space-x-1">
-                  <span className="text-3xl font-extrabold text-slate-900">{priceDisplay}</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{priceDisplay}</span>
                   <span className="text-xs font-semibold text-slate-400">/ month</span>
                 </div>
 
-                <div className="border-t border-slate-100 pt-4 space-y-2.5">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">INCLUDED FEATURES</div>
+                <div className="border-t border-slate-100 pt-4 space-y-2">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">FEATURES</div>
                   {plan.features.map((feat, idx) => (
                     <div key={idx} className="flex items-start space-x-2 text-xs text-slate-700">
-                      <Check className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                      <Check className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
                       <span>{feat}</span>
                     </div>
                   ))}
@@ -326,11 +315,9 @@ export default function BillingPage() {
               <button
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={plan.isCurrent || isProcessing}
-                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
+                className={`w-full py-2.5 rounded-xl text-xs font-bold transition shadow-xs ${
                   plan.isCurrent
                     ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-default'
-                    : plan.highlight
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-slate-900 text-white hover:bg-slate-800'
                 }`}
               >
