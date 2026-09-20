@@ -13,17 +13,10 @@ import {
   ArrowLeft,
   Smartphone,
   Monitor,
-  CheckCircle2,
-  ExternalLink,
-  Linkedin,
-  Twitter,
-  MessageSquare,
+  Eye,
   ShieldCheck,
   Download,
-  Share2,
-  Eye,
-  Sliders,
-  Sparkles
+  Share2
 } from 'lucide-react';
 
 import { API_BASE_URL } from '@/lib/apiConfig';
@@ -44,6 +37,7 @@ export default function CardBuilderPage() {
   const [designation, setDesignation] = useState('');
   const [company, setCompany] = useState('');
   const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
@@ -99,6 +93,7 @@ export default function CardBuilderPage() {
     setDesignation(sec.designation || '');
     setCompany(sec.company || '');
     setBio(sec.bio || '');
+    setAvatarUrl(sec.avatar_url || sec.avatarUrl || '');
     setEmail(sec.email || '');
     setPhone(sec.phone || '');
     setWebsite(sec.website || '');
@@ -145,6 +140,7 @@ export default function CardBuilderPage() {
             designation,
             company,
             bio,
+            avatar_url: avatarUrl,
             email,
             phone,
             website,
@@ -161,7 +157,7 @@ export default function CardBuilderPage() {
       if (res.ok) {
         setCardStatus(targetStatus);
         setSavingStatus(targetStatus === 'PUBLISHED' ? 'Published live!' : 'Saved to draft');
-        setTimeout(() => setSavingStatus(''), 2200);
+        setTimeout(() => setSavingStatus(''), 2000);
         await fetchCards();
       } else {
         const errJson = await res.json().catch(() => ({}));
@@ -177,7 +173,7 @@ export default function CardBuilderPage() {
 
   return (
     <div className="space-y-6 pb-12 font-sans text-slate-900">
-      {/* Top Studio Control Bar */}
+      {/* Top Studio Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs">
         <div className="flex items-center space-x-3">
           <Link
@@ -193,7 +189,6 @@ export default function CardBuilderPage() {
                 Card Studio Editor
               </h1>
 
-              {/* Status Badge */}
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                   cardStatus === 'PUBLISHED'
@@ -211,12 +206,12 @@ export default function CardBuilderPage() {
               )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Real-time profile studio with live smartphone preview.
+              Real-time card editor with live smartphone preview.
             </p>
           </div>
         </div>
 
-        {/* Action Buttons & Card Selector */}
+        {/* Action Bar & Card Selector */}
         <div className="flex items-center space-x-3">
           {cards.length > 1 && (
             <select
@@ -260,10 +255,10 @@ export default function CardBuilderPage() {
       {/* 3-Zone Studio Grid */}
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         
-        {/* Zone 1: Section Navigation Bar (3 cols) */}
+        {/* Zone 1: Builder Section Navigation (3 cols) */}
         <div className="lg:col-span-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">
-            BUILDER SECTIONS
+            SECTIONS
           </div>
 
           <div className="space-y-1">
@@ -339,10 +334,10 @@ export default function CardBuilderPage() {
           </div>
         </div>
 
-        {/* Zone 2: Real-Time Smartphone Live Preview (5 cols) */}
+        {/* Zone 2: Real-Time Phone Preview (5 cols) */}
         <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4 flex flex-col items-center">
           <div className="w-full flex items-center justify-between pb-3 border-b border-slate-100">
-            <span className="text-xs font-bold text-slate-800">Real-Time Phone Preview</span>
+            <span className="text-xs font-bold text-slate-800">Phone Live Preview</span>
 
             <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
               <button
@@ -364,72 +359,97 @@ export default function CardBuilderPage() {
             </div>
           </div>
 
-          {/* Simulated Smartphone Frame */}
+          {/* High-Fidelity Phone Preview matching Public Card */}
           <div className={`w-full transition-all duration-300 ${deviceView === 'mobile' ? 'max-w-xs' : 'max-w-md'}`}>
             <div className="rounded-[2.5rem] border-4 border-slate-900 bg-slate-950 p-3 shadow-xl">
               <div className="bg-white rounded-[2rem] overflow-hidden min-h-[440px] p-5 text-slate-900 space-y-4">
                 
-                {/* Simulated Header */}
+                {/* Header */}
                 <div className="text-center space-y-2">
-                  <div
-                    className="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-extrabold text-white text-xl shadow-xs"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    {title?.charAt(0).toUpperCase() || 'A'}
-                  </div>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={title}
+                      className="w-16 h-16 rounded-full object-cover mx-auto shadow-xs border-2 border-white ring-1 ring-slate-200"
+                    />
+                  ) : (
+                    <div
+                      className="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-extrabold text-white text-xl shadow-xs"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      {title?.charAt(0).toUpperCase() || 'A'}
+                    </div>
+                  )}
+
                   <div>
                     <div className="flex items-center justify-center space-x-1">
                       <h3 className="text-base font-extrabold text-slate-900">{title || 'Your Name'}</h3>
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     </div>
-                    <p className="text-xs font-semibold text-slate-600 mt-0.5">{designation || 'Title / Role'}</p>
-                    <p className="text-[11px] font-medium text-slate-500">{company || 'Company'}</p>
+                    {(designation || company) && (
+                      <p className="text-xs font-semibold text-slate-600 mt-0.5">
+                        {designation}
+                        {designation && company ? ' • ' : ''}
+                        {company && <span className="text-slate-500 font-normal">{company}</span>}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Simulated Bio */}
+                {/* Bio */}
                 {bio && (
-                  <p className="text-[11px] text-slate-600 text-center leading-relaxed px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                  <p className="text-[11px] text-slate-500 text-center font-normal leading-relaxed px-2">
                     {bio}
                   </p>
                 )}
 
-                {/* Simulated CTAs */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
+                {/* Action Suite */}
+                <div className="space-y-1.5 pt-1">
                   <div
-                    className="w-full text-center py-2.5 rounded-xl font-bold text-[11px] text-white shadow-xs flex items-center justify-center space-x-1"
+                    className="w-full text-center py-2.5 rounded-xl font-bold text-[11px] text-white shadow-xs flex items-center justify-center space-x-1.5"
                     style={{ backgroundColor: primaryColor }}
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Save Contact</span>
                   </div>
-                  <div className="w-full text-center py-2.5 rounded-xl border border-slate-200 text-slate-800 font-semibold text-[11px] bg-slate-50 flex items-center justify-center space-x-1">
-                    <Share2 className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Exchange</span>
+                  <div className="w-full text-center py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-[11px] bg-slate-50 flex items-center justify-center space-x-1.5">
+                    <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Exchange Details</span>
                   </div>
                 </div>
 
-                {/* Simulated Links */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-                  {phone && (
-                    <div className="flex items-center space-x-2 text-slate-700 truncate p-2 rounded-lg bg-slate-50">
-                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{phone}</span>
-                    </div>
-                  )}
-                  {email && (
-                    <div className="flex items-center space-x-2 text-slate-700 truncate p-2 rounded-lg bg-slate-50">
-                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{email}</span>
-                    </div>
-                  )}
-                  {website && (
-                    <div className="flex items-center space-x-2 text-slate-700 truncate p-2 rounded-lg bg-slate-50">
-                      <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{website}</span>
-                    </div>
-                  )}
-                </div>
+                {/* Clean Contact Rows */}
+                {(phone || email || website) && (
+                  <div className="space-y-1 pt-2 border-t border-slate-100 text-xs">
+                    {phone && (
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
+                        <div className="flex items-center space-x-2 truncate">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{phone}</span>
+                        </div>
+                        <span className="text-[9px] text-slate-400 font-medium">Call</span>
+                      </div>
+                    )}
+                    {email && (
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
+                        <div className="flex items-center space-x-2 truncate">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{email}</span>
+                        </div>
+                        <span className="text-[9px] text-slate-400 font-medium">Email</span>
+                      </div>
+                    )}
+                    {website && (
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
+                        <div className="flex items-center space-x-2 truncate">
+                          <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{website}</span>
+                        </div>
+                        <span className="text-[9px] text-slate-400 font-medium">Website</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               </div>
             </div>
@@ -490,6 +510,20 @@ export default function CardBuilderPage() {
               </div>
 
               <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase">Profile Photo URL (Optional)</label>
+                <input
+                  type="url"
+                  value={avatarUrl}
+                  onChange={(e) => {
+                    setAvatarUrl(e.target.value);
+                    handleSaveCard();
+                  }}
+                  placeholder="https://example.com/photo.jpg"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
+                />
+              </div>
+
+              <div className="space-y-1">
                 <label className="block text-[11px] font-bold text-slate-700 uppercase">Bio / Summary</label>
                 <textarea
                   rows={3}
@@ -498,7 +532,7 @@ export default function CardBuilderPage() {
                     setBio(e.target.value);
                     handleSaveCard();
                   }}
-                  placeholder="Short introduction..."
+                  placeholder="Short professional summary..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
@@ -558,7 +592,7 @@ export default function CardBuilderPage() {
           {activeSection === 'social' && (
             <div className="space-y-3">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
-                Social & Media Handles
+                Social & Online Handles
               </h3>
 
               <div className="space-y-1">

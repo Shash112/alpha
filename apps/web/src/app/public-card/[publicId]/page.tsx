@@ -8,7 +8,6 @@ import {
   Mail,
   Phone,
   Globe,
-  Building2,
   CheckCircle2,
   AlertCircle,
   X,
@@ -49,7 +48,7 @@ export default function PublicCardPage() {
           setError(data.message || 'Profile unavailable or unpublished.');
         }
       })
-      .catch(() => setError('Failed to connect to digital identity service.'))
+      .catch(() => setError('Unable to load digital card profile.'))
       .finally(() => setLoading(false));
   }, [publicId]);
 
@@ -71,7 +70,7 @@ export default function PublicCardPage() {
           setLeadEmail('');
           setLeadPhone('');
           setLeadCompany('');
-        }, 2200);
+        }, 2000);
       }
     } catch (err) {
       console.error(err);
@@ -82,10 +81,10 @@ export default function PublicCardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 font-sans text-slate-600">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center space-x-3.5">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
-          <span className="text-xs font-semibold text-slate-800">Loading Digital Identity...</span>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans text-slate-500">
+        <div className="bg-white px-5 py-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center space-x-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+          <span className="text-xs font-semibold text-slate-700">Loading Profile...</span>
         </div>
       </div>
     );
@@ -93,14 +92,14 @@ export default function PublicCardPage() {
 
   if (error || !card) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 font-sans">
-        <div className="bg-white w-full max-w-sm p-8 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto border border-slate-200">
-            <AlertCircle className="w-6 h-6" />
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans">
+        <div className="bg-white w-full max-w-sm p-8 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-3">
+          <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900">Card Unavailable</h2>
-            <p className="text-xs text-slate-500 mt-1">{error || 'This public identity profile is not currently published.'}</p>
+            <h2 className="text-sm font-bold text-slate-900">Profile Offline</h2>
+            <p className="text-xs text-slate-500 mt-1">{error || 'This card profile is unavailable or currently set to draft.'}</p>
           </div>
         </div>
       </div>
@@ -110,10 +109,11 @@ export default function PublicCardPage() {
   const heroSection = card.sections?.find((s: any) => s.type === 'hero');
   const contactSection = card.sections?.find((s: any) => s.type === 'contact');
 
-  const name = heroSection?.fields?.name || card.title || 'Digital Identity';
+  const name = heroSection?.fields?.name || card.title || 'Digital Profile';
   const designation = heroSection?.fields?.designation || card.sections?.designation || '';
   const company = heroSection?.fields?.company || card.sections?.company || '';
   const bio = heroSection?.fields?.bio || card.sections?.bio || '';
+  const avatarUrl = heroSection?.fields?.avatar_url || card.sections?.avatar_url || card.sections?.avatarUrl || '';
 
   const email = contactSection?.fields?.email || card.sections?.email || '';
   const phone = contactSection?.fields?.phone || card.sections?.phone || '';
@@ -130,32 +130,36 @@ export default function PublicCardPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between items-center p-4 sm:p-6 font-sans">
-      <main className="w-full max-w-sm sm:max-w-md bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-xs space-y-6 my-auto">
+      <main className="w-full max-w-sm bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-xs space-y-5 my-auto">
         
-        {/* Profile Header */}
+        {/* Profile Avatar & Primary Identity */}
         <div className="text-center space-y-3">
-          <div
-            className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold text-white shadow-xs"
-            style={{ backgroundColor: brandAccent }}
-          >
-            {name.charAt(0).toUpperCase()}
-          </div>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={name}
+              className="w-20 h-20 rounded-full object-cover mx-auto shadow-xs border-2 border-white ring-1 ring-slate-200"
+            />
+          ) : (
+            <div
+              className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold text-white shadow-xs"
+              style={{ backgroundColor: brandAccent }}
+            >
+              {name.charAt(0).toUpperCase()}
+            </div>
+          )}
 
           <div className="space-y-0.5">
-            <div className="flex items-center justify-center space-x-1.5">
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">{name}</h1>
+            <div className="flex items-center justify-center space-x-1">
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{name}</h1>
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             </div>
 
-            {designation && (
-              <p className="text-xs font-semibold text-slate-700 mt-0.5">
+            {(designation || company) && (
+              <p className="text-xs font-semibold text-slate-600">
                 {designation}
-              </p>
-            )}
-
-            {company && (
-              <p className="text-xs font-medium text-slate-500">
-                {company}
+                {designation && company ? ' • ' : ''}
+                {company && <span className="text-slate-500 font-normal">{company}</span>}
               </p>
             )}
           </div>
@@ -163,13 +167,13 @@ export default function PublicCardPage() {
 
         {/* Bio */}
         {bio && (
-          <p className="text-xs text-slate-600 text-center leading-relaxed px-4 py-3 bg-slate-50 rounded-xl border border-slate-100 font-normal">
+          <p className="text-xs text-slate-500 text-center font-normal leading-relaxed max-w-xs mx-auto">
             {bio}
           </p>
         )}
 
-        {/* Primary Action Suite */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        {/* Primary Action Button Suite */}
+        <div className="space-y-2 pt-1">
           <a
             href={`${API_BASE_URL}/api/v1/public/cards/${publicId}/vcard`}
             download
@@ -182,66 +186,68 @@ export default function PublicCardPage() {
 
           <button
             onClick={() => setShowLeadModal(true)}
-            className="w-full py-3 rounded-xl text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 transition active:scale-95 flex items-center justify-center space-x-2"
+            className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition active:scale-95 flex items-center justify-center space-x-1.5"
           >
-            <Share2 className="w-4 h-4 shrink-0 text-slate-600" />
-            <span>Exchange</span>
+            <Share2 className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+            <span>Exchange Details</span>
           </button>
         </div>
 
-        {/* Actionable Direct Links */}
-        <div className="space-y-2 pt-2 border-t border-slate-100">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            DIRECT CONTACT
+        {/* Clean Direct Contact Rows */}
+        {(phone || email || website) && (
+          <div className="space-y-1.5 pt-2 border-t border-slate-100">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+              Contact
+            </div>
+
+            {phone && (
+              <a
+                href={`tel:${phone}`}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs font-semibold text-slate-900 transition"
+              >
+                <div className="flex items-center space-x-2.5 truncate">
+                  <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{phone}</span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Call</span>
+              </a>
+            )}
+
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs font-semibold text-slate-900 transition"
+              >
+                <div className="flex items-center space-x-2.5 truncate">
+                  <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{email}</span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Email</span>
+              </a>
+            )}
+
+            {website && (
+              <a
+                href={website.startsWith('http') ? website : `https://${website}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs font-semibold text-slate-900 transition"
+              >
+                <div className="flex items-center space-x-2.5 truncate">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{website}</span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Website</span>
+              </a>
+            )}
           </div>
+        )}
 
-          {phone && (
-            <a
-              href={`tel:${phone}`}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs font-semibold text-slate-900 hover:bg-slate-100 transition"
-            >
-              <div className="flex items-center space-x-3 truncate">
-                <Phone className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="truncate">{phone}</span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-normal">Call</span>
-            </a>
-          )}
-
-          {email && (
-            <a
-              href={`mailto:${email}`}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs font-semibold text-slate-900 hover:bg-slate-100 transition"
-            >
-              <div className="flex items-center space-x-3 truncate">
-                <Mail className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="truncate">{email}</span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-normal">Email</span>
-            </a>
-          )}
-
-          {website && (
-            <a
-              href={website.startsWith('http') ? website : `https://${website}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs font-semibold text-slate-900 hover:bg-slate-100 transition"
-            >
-              <div className="flex items-center space-x-3 truncate">
-                <Globe className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="truncate">{website}</span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-normal">Website</span>
-            </a>
-          )}
-        </div>
-
-        {/* Social Profiles Grid */}
+        {/* Clean Connect Profiles */}
         {(socialLinkedin || socialTwitter || socialInstagram || socialGithub || socialYoutube || socialWhatsapp) && (
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              ONLINE PROFILES
+          <div className="space-y-1.5 pt-2 border-t border-slate-100">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+              Connect
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
@@ -250,9 +256,9 @@ export default function PublicCardPage() {
                   href={socialLinkedin.startsWith('http') ? socialLinkedin : `https://${socialLinkedin}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <Linkedin className="w-4 h-4 text-slate-700 shrink-0" />
+                  <Linkedin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span className="truncate">LinkedIn</span>
                 </a>
               )}
@@ -262,10 +268,10 @@ export default function PublicCardPage() {
                   href={socialTwitter.startsWith('http') ? socialTwitter : `https://${socialTwitter}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <Twitter className="w-4 h-4 text-slate-700 shrink-0" />
-                  <span className="truncate">X / Twitter</span>
+                  <Twitter className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span className="truncate">X</span>
                 </a>
               )}
 
@@ -274,9 +280,9 @@ export default function PublicCardPage() {
                   href={socialInstagram.startsWith('http') ? socialInstagram : `https://${socialInstagram}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <ExternalLink className="w-4 h-4 text-slate-700 shrink-0" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span className="truncate">Instagram</span>
                 </a>
               )}
@@ -286,9 +292,9 @@ export default function PublicCardPage() {
                   href={socialGithub.startsWith('http') ? socialGithub : `https://${socialGithub}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <ExternalLink className="w-4 h-4 text-slate-700 shrink-0" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span className="truncate">GitHub</span>
                 </a>
               )}
@@ -298,9 +304,9 @@ export default function PublicCardPage() {
                   href={socialYoutube.startsWith('http') ? socialYoutube : `https://${socialYoutube}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <ExternalLink className="w-4 h-4 text-slate-700 shrink-0" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span className="truncate">YouTube</span>
                 </a>
               )}
@@ -310,9 +316,9 @@ export default function PublicCardPage() {
                   href={socialWhatsapp.startsWith('http') ? socialWhatsapp : `https://wa.me/${socialWhatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 hover:bg-slate-100 transition truncate"
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-800 transition truncate"
                 >
-                  <MessageSquare className="w-4 h-4 text-slate-700 shrink-0" />
+                  <MessageSquare className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span className="truncate">WhatsApp</span>
                 </a>
               )}
@@ -328,23 +334,23 @@ export default function PublicCardPage() {
         </div>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="text-[11px] font-medium text-slate-400 text-center py-4">
-        Verified Digital Identity
+      {/* Minimal Quiet Footer */}
+      <footer className="text-[11px] text-slate-400 text-center py-4">
+        Digital Identity Profile
       </footer>
 
       {/* Exchange Contact Details Modal */}
       {showLeadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-sm p-6 rounded-2xl border border-slate-200 shadow-xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 font-sans">
+          <div className="bg-white w-full max-w-sm p-6 rounded-2xl border border-slate-200 shadow-xl space-y-4">
             {leadSubmitted ? (
               <div className="text-center py-4 space-y-2">
                 <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900">Details Sent</h3>
+                <h3 className="text-sm font-bold text-slate-900">Details Exchanged</h3>
                 <p className="text-xs text-slate-500">
-                  Your contact card has been shared with {name}.
+                  Your contact information has been shared with {name}.
                 </p>
               </div>
             ) : (
