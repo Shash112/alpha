@@ -9,6 +9,7 @@ import { API_BASE_URL } from '@/lib/apiConfig';
 
 export default function LoginPage() {
   const router = useRouter();
+  // Production auth state — initialized to empty strings (no demo defaults)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
