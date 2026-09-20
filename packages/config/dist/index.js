@@ -1,8 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SYSTEM_CONSTANTS = exports.EnvSchema = void 0;
 exports.validateEnv = validateEnv;
+const dotenv_1 = __importDefault(require("dotenv"));
 const zod_1 = require("zod");
+dotenv_1.default.config();
 exports.EnvSchema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(['development', 'staging', 'production', 'test']).default('development'),
     PORT: zod_1.z.coerce.number().default(4000),

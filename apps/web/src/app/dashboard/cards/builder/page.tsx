@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -16,7 +16,8 @@ import {
   Eye,
   ShieldCheck,
   Download,
-  Share2
+  Share2,
+  Save
 } from 'lucide-react';
 
 import { API_BASE_URL } from '@/lib/apiConfig';
@@ -31,6 +32,7 @@ export default function CardBuilderPage() {
   const [activeSection, setActiveSection] = useState<'profile' | 'contact' | 'social' | 'theme' | 'privacy'>('profile');
   const [deviceView, setDeviceView] = useState<'mobile' | 'desktop'>('mobile');
   const [savingStatus, setSavingStatus] = useState<string>('');
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -52,6 +54,8 @@ export default function CardBuilderPage() {
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
   const [cardStatus, setCardStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
 
+  const isSavingRef = useRef(false);
+
   const fetchCards = async () => {
     const token = localStorage.getItem('accessToken');
     const wsId = localStorage.getItem('activeWorkspaceId');
@@ -66,15 +70,13 @@ export default function CardBuilderPage() {
       setCards(loaded);
 
       if (loaded.length > 0) {
-        setSelectedCardId((prevId) => {
-          const targetId = prevId || cardIdParam;
-          const targetCard = (targetId && loaded.find((c: any) => c.id === targetId)) || loaded[0];
-          if (targetCard) {
-            loadCardDetails(targetCard);
-            return targetCard.id;
-          }
-          return prevId;
-        });
+        const targetId = selectedCardId || cardIdParam || loaded[0].id;
+        const targetCard = loaded.find((c: any) => c.id === targetId) || loaded[0];
+        if (targetCard) {
+          setSelectedCardId(targetCard.id);
+          loadCardDetails(targetCard);
+          setIsInitialized(true);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -112,11 +114,15 @@ export default function CardBuilderPage() {
   const handleCardChange = (id: string) => {
     setSelectedCardId(id);
     const target = cards.find((c) => c.id === id);
-    if (target) loadCardDetails(target);
+    if (target) {
+      loadCardDetails(target);
+      setIsInitialized(true);
+    }
   };
 
   const handleSaveCard = async (publish?: boolean) => {
-    if (!selectedCardId) return;
+    if (!selectedCardId || isSavingRef.current) return;
+    isSavingRef.current = true;
     setSavingStatus('Autosaving...');
 
     const token = localStorage.getItem('accessToken');
@@ -124,49 +130,97 @@ export default function CardBuilderPage() {
     const targetStatus = publish !== undefined ? (publish ? 'PUBLISHED' : 'DRAFT') : cardStatus;
 
     try {
+      const payload = {
+        title,
+        vanitySlug,
+        themeColor: primaryColor,
+        themeName: themeStyle,
+        status: targetStatus,
+        sections: {
+          designation,
+          company,
+          bio,
+          avatar_url: avatarUrl,
+          email,
+          phone,
+          website,
+          social_linkedin: socialLinkedin,
+          social_twitter: socialTwitter,
+          social_instagram: socialInstagram,
+          social_github: socialGithub,
+          social_youtube: socialYoutube,
+          social_whatsapp: socialWhatsapp
+        }
+      };
+
       const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards/${selectedCardId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          title,
-          vanitySlug,
-          themeColor: primaryColor,
-          themeName: themeStyle,
-          status: targetStatus,
-          sections: {
-            designation,
-            company,
-            bio,
-            avatar_url: avatarUrl,
-            email,
-            phone,
-            website,
-            social_linkedin: socialLinkedin,
-            social_twitter: socialTwitter,
-            social_instagram: socialInstagram,
-            social_github: socialGithub,
-            social_youtube: socialYoutube,
-            social_whatsapp: socialWhatsapp
-          }
-        })
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
         setCardStatus(targetStatus);
-        setSavingStatus(targetStatus === 'PUBLISHED' ? 'Published live!' : 'Saved to draft');
-        setTimeout(() => setSavingStatus(''), 2000);
-        await fetchCards();
+        setSavingStatus(targetStatus === 'PUBLISHED' ? 'Published live!' : 'Saved');
+        setTimeout(() => setSavingStatus(''), 2500);
+
+        setCards((prev) =>
+          prev.map((c) =>
+            c.id === selectedCardId
+              ? {
+                  ...c,
+                  title,
+                  vanity_slug: vanitySlug,
+                  theme_color: primaryColor,
+                  theme_name: themeStyle,
+                  status: targetStatus,
+                  sections: payload.sections
+                }
+              : c
+          )
+        );
       } else {
         const errJson = await res.json().catch(() => ({}));
         setSavingStatus(errJson.message || 'Save failed');
       }
     } catch (err) {
       setSavingStatus('Save failed');
+    } finally {
+      isSavingRef.current = false;
     }
   };
+
+  // Debounced Auto-Save
+  useEffect(() => {
+    if (!isInitialized || !selectedCardId) return;
+
+    const timer = setTimeout(() => {
+      handleSaveCard();
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [
+    title,
+    designation,
+    company,
+    bio,
+    avatarUrl,
+    email,
+    phone,
+    website,
+    vanitySlug,
+    primaryColor,
+    themeStyle,
+    socialLinkedin,
+    socialTwitter,
+    socialInstagram,
+    socialGithub,
+    socialYoutube,
+    socialWhatsapp
+  ]);
 
   const colorPresets = ['#0F172A', '#1E293B', '#2563EB', '#0D9488', '#D97706', '#E11D48', '#7C3AED'];
   const activeCard = cards.find((c) => c.id === selectedCardId);
@@ -238,6 +292,14 @@ export default function CardBuilderPage() {
               <span>Preview Live</span>
             </a>
           )}
+
+          <button
+            onClick={() => handleSaveCard()}
+            className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition flex items-center space-x-1.5"
+          >
+            <Save className="w-3.5 h-3.5 text-slate-500" />
+            <span>Save</span>
+          </button>
 
           <button
             onClick={() => handleSaveCard(cardStatus === 'PUBLISHED' ? false : true)}
@@ -471,10 +533,7 @@ export default function CardBuilderPage() {
                 <input
                   type="text"
                   value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
@@ -485,10 +544,7 @@ export default function CardBuilderPage() {
                   <input
                     type="text"
                     value={designation}
-                    onChange={(e) => {
-                      setDesignation(e.target.value);
-                      handleSaveCard();
-                    }}
+                    onChange={(e) => setDesignation(e.target.value)}
                     placeholder="e.g. Founder"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                   />
@@ -499,10 +555,7 @@ export default function CardBuilderPage() {
                   <input
                     type="text"
                     value={company}
-                    onChange={(e) => {
-                      setCompany(e.target.value);
-                      handleSaveCard();
-                    }}
+                    onChange={(e) => setCompany(e.target.value)}
                     placeholder="e.g. Alpha"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                   />
@@ -514,10 +567,7 @@ export default function CardBuilderPage() {
                 <input
                   type="url"
                   value={avatarUrl}
-                  onChange={(e) => {
-                    setAvatarUrl(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="https://example.com/photo.jpg"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -528,10 +578,7 @@ export default function CardBuilderPage() {
                 <textarea
                   rows={3}
                   value={bio}
-                  onChange={(e) => {
-                    setBio(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setBio(e.target.value)}
                   placeholder="Short professional summary..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -551,10 +598,7 @@ export default function CardBuilderPage() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
@@ -564,10 +608,7 @@ export default function CardBuilderPage() {
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
@@ -577,10 +618,7 @@ export default function CardBuilderPage() {
                 <input
                   type="url"
                   value={website}
-                  onChange={(e) => {
-                    setWebsite(e.target.value);
-                    handleSaveCard();
-                  }}
+                  onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://yourdomain.com"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -600,7 +638,7 @@ export default function CardBuilderPage() {
                 <input
                   type="text"
                   value={socialLinkedin}
-                  onChange={(e) => { setSocialLinkedin(e.target.value); handleSaveCard(); }}
+                  onChange={(e) => setSocialLinkedin(e.target.value)}
                   placeholder="linkedin.com/in/username"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -611,7 +649,7 @@ export default function CardBuilderPage() {
                 <input
                   type="text"
                   value={socialTwitter}
-                  onChange={(e) => { setSocialTwitter(e.target.value); handleSaveCard(); }}
+                  onChange={(e) => setSocialTwitter(e.target.value)}
                   placeholder="x.com/username"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -622,7 +660,7 @@ export default function CardBuilderPage() {
                 <input
                   type="text"
                   value={socialInstagram}
-                  onChange={(e) => { setSocialInstagram(e.target.value); handleSaveCard(); }}
+                  onChange={(e) => setSocialInstagram(e.target.value)}
                   placeholder="instagram.com/username"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -633,7 +671,7 @@ export default function CardBuilderPage() {
                 <input
                   type="text"
                   value={socialWhatsapp}
-                  onChange={(e) => { setSocialWhatsapp(e.target.value); handleSaveCard(); }}
+                  onChange={(e) => setSocialWhatsapp(e.target.value)}
                   placeholder="+15550000000"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 />
@@ -654,13 +692,13 @@ export default function CardBuilderPage() {
                   <input
                     type="color"
                     value={primaryColor}
-                    onChange={(e) => { setPrimaryColor(e.target.value); handleSaveCard(); }}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
                     className="w-8 h-8 rounded-xl border border-slate-200 cursor-pointer p-0.5"
                   />
                   <input
                     type="text"
                     value={primaryColor}
-                    onChange={(e) => { setPrimaryColor(e.target.value); handleSaveCard(); }}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
                     className="w-24 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-900"
                   />
                 </div>
@@ -670,7 +708,7 @@ export default function CardBuilderPage() {
                     <button
                       key={c}
                       type="button"
-                      onClick={() => { setPrimaryColor(c); handleSaveCard(); }}
+                      onClick={() => setPrimaryColor(c)}
                       className="w-6 h-6 rounded-full border border-slate-200 hover:scale-110 transition"
                       style={{ backgroundColor: c }}
                     />
@@ -696,7 +734,7 @@ export default function CardBuilderPage() {
                   <input
                     type="text"
                     value={vanitySlug}
-                    onChange={(e) => { setVanitySlug(e.target.value); handleSaveCard(); }}
+                    onChange={(e) => setVanitySlug(e.target.value)}
                     placeholder="my-alias"
                     className="w-full px-3 py-2 rounded-r-xl border border-slate-200 text-xs text-slate-900 font-mono focus:outline-none"
                   />
@@ -709,3 +747,4 @@ export default function CardBuilderPage() {
     </div>
   );
 }
+
