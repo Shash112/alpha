@@ -9,7 +9,6 @@ import {
   CreditCard,
   Palette,
   Users,
-  Calendar,
   Layers,
   Globe,
   Puzzle,
@@ -22,6 +21,7 @@ import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
 import { UserMenu } from '@/components/UserMenu';
 import { GlobalSearchModal } from '@/components/GlobalSearchModal';
 import { API_BASE_URL } from '@/lib/apiConfig';
+import { Spinner } from '@/components/ui';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -70,10 +70,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] text-slate-500 font-sans p-4">
-        <div className="flex items-center space-x-3 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
-          <span className="text-xs font-semibold text-slate-800">Loading Workspace...</span>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-500 font-sans p-4">
+        <div className="flex items-center space-x-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+          <Spinner size="sm" />
+          <span className="text-xs font-semibold text-slate-800">Loading workspace...</span>
         </div>
       </div>
     );
@@ -81,20 +81,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navGroups = [
     {
-      group: 'OVERVIEW',
+      group: 'Overview',
       items: [
         { name: 'Overview', href: '/dashboard', icon: BarChart3 }
       ]
     },
     {
-      group: 'DIGITAL IDENTITY',
+      group: 'Digital Identity',
       items: [
         { name: 'My Cards', href: '/dashboard/cards', icon: CreditCard },
         { name: 'Card Studio', href: '/dashboard/cards/builder', icon: Palette }
       ]
     },
     {
-      group: 'NETWORK & GROWTH',
+      group: 'Network & Growth',
       items: [
         { name: 'Leads & Contacts', href: '/dashboard/leads', icon: Users },
         { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       ]
     },
     {
-      group: 'WORKSPACE',
+      group: 'Workspace',
       items: [
         { name: 'Team Members', href: '/dashboard/team', icon: Users },
         { name: 'Custom Domain', href: '/dashboard/domain', icon: Globe },
@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       ]
     },
     {
-      group: 'ACCOUNT',
+      group: 'Account',
       items: [
         { name: 'Billing & Plans', href: '/dashboard/billing', icon: BillingIcon },
         { name: 'Settings', href: '/dashboard/settings', icon: Settings }
@@ -119,11 +119,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans">
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans">
       <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* Sidebar Navigation */}
-      <aside className="w-64 h-full border-r border-slate-200/80 bg-white p-5 hidden md:flex flex-col shrink-0 overflow-hidden">
+      <aside className="w-64 h-full border-r border-slate-200 bg-white p-5 hidden md:flex flex-col shrink-0 overflow-hidden">
         <div className="flex flex-col h-full space-y-5">
           
           {/* Logo */}
@@ -155,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <nav className="space-y-4 flex-1 overflow-y-auto pr-1">
             {navGroups.map((group) => (
               <div key={group.group} className="space-y-1">
-                <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="px-3 text-xs font-bold text-slate-400">
                   {group.group}
                 </div>
                 {group.items.map((item) => {
@@ -190,7 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Viewport Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header Control Bar */}
-        <header className="h-16 border-b border-slate-200/80 bg-white px-6 flex items-center justify-between shrink-0">
+        <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSearchOpen(true)}
@@ -204,7 +204,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center space-x-3">
             <Link
               href="/dashboard/cards/builder"
-              className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition flex items-center space-x-1.5 shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition flex items-center space-x-1.5 shadow-2xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Card</span>

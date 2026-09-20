@@ -14,13 +14,13 @@ import {
   Smartphone,
   Monitor,
   Eye,
-  ShieldCheck,
   Download,
   Share2,
   Save
 } from 'lucide-react';
 
 import { API_BASE_URL } from '@/lib/apiConfig';
+import { Button, Input, Textarea, Select, Card, Badge, Avatar } from '@/components/ui';
 
 export default function CardBuilderPage() {
   const searchParams = useSearchParams();
@@ -227,8 +227,8 @@ export default function CardBuilderPage() {
 
   return (
     <div className="space-y-6 pb-12 font-sans text-slate-900">
-      {/* Top Studio Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+      {/* Top Studio Header */}
+      <Card padding="sm" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-3">
           <Link
             href="/dashboard/cards"
@@ -243,161 +243,99 @@ export default function CardBuilderPage() {
                 Card Studio Editor
               </h1>
 
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                  cardStatus === 'PUBLISHED'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                }`}
-              >
+              <Badge variant={cardStatus === 'PUBLISHED' ? 'success' : 'warning'}>
                 {cardStatus}
-              </span>
+              </Badge>
 
               {savingStatus && (
-                <span className="text-[11px] font-semibold text-slate-500 animate-pulse">
+                <span className="text-xs font-medium text-slate-500 animate-pulse">
                   {savingStatus}
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Real-time card editor with live smartphone preview.
+              Edit card profile with live smartphone preview.
             </p>
           </div>
         </div>
 
         {/* Action Bar & Card Selector */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
           {cards.length > 1 && (
-            <select
+            <Select
               value={selectedCardId}
               onChange={(e) => handleCardChange(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50 focus:outline-none"
+              className="w-auto text-xs py-1.5"
             >
               {cards.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.title || 'Untitled Card'}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
 
           {activeCard?.public_id && (
-            <a
-              href={`/c/${activeCard.public_id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center space-x-1.5"
-            >
-              <Eye className="w-3.5 h-3.5 text-slate-500" />
-              <span>Preview Live</span>
+            <a href={`/c/${activeCard.public_id}`} target="_blank" rel="noreferrer">
+              <Button variant="outline" size="sm" leftIcon={<Eye className="w-3.5 h-3.5 text-slate-500" />}>
+                Preview Live
+              </Button>
             </a>
           )}
 
-          <button
-            onClick={() => handleSaveCard()}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition flex items-center space-x-1.5"
-          >
-            <Save className="w-3.5 h-3.5 text-slate-500" />
-            <span>Save</span>
-          </button>
+          <Button variant="outline" size="sm" onClick={() => handleSaveCard()} leftIcon={<Save className="w-3.5 h-3.5 text-slate-500" />}>
+            Save
+          </Button>
 
-          <button
+          <Button
+            variant={cardStatus === 'PUBLISHED' ? 'secondary' : 'primary'}
+            size="sm"
             onClick={() => handleSaveCard(cardStatus === 'PUBLISHED' ? false : true)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs ${
-              cardStatus === 'PUBLISHED'
-                ? 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200'
-                : 'bg-slate-900 text-white hover:bg-slate-800'
-            }`}
           >
             {cardStatus === 'PUBLISHED' ? 'Unpublish' : 'Publish Live'}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* 3-Zone Studio Grid */}
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         
-        {/* Zone 1: Builder Section Navigation (3 cols) */}
-        <div className="lg:col-span-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">
-            SECTIONS
+        {/* Zone 1: Section Navigation (3 cols) */}
+        <Card padding="sm" className="lg:col-span-3 space-y-2">
+          <div className="text-xs font-bold text-slate-500 px-2 py-1">
+            Sections
           </div>
 
           <div className="space-y-1">
-            <button
-              onClick={() => setActiveSection('profile')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeSection === 'profile'
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <User className="w-4 h-4 shrink-0" />
-                <span>Profile Info</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('contact')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeSection === 'contact'
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <Mail className="w-4 h-4 shrink-0" />
-                <span>Direct Contact</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('social')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeSection === 'social'
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <Globe className="w-4 h-4 shrink-0" />
-                <span>Social Links</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('theme')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeSection === 'theme'
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <Palette className="w-4 h-4 shrink-0" />
-                <span>Theme & Palette</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('privacy')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeSection === 'privacy'
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <Shield className="w-4 h-4 shrink-0" />
-                <span>URL & Identity</span>
-              </div>
-            </button>
+            {[
+              { id: 'profile', label: 'Profile Info', icon: User },
+              { id: 'contact', label: 'Direct Contact', icon: Mail },
+              { id: 'social', label: 'Social Links', icon: Globe },
+              { id: 'theme', label: 'Theme & Palette', icon: Palette },
+              { id: 'privacy', label: 'URL & Identity', icon: Shield }
+            ].map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id as any)}
+                  className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
+                    isActive
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span>{section.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </Card>
 
-        {/* Zone 2: Real-Time Phone Preview (5 cols) */}
-        <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4 flex flex-col items-center">
+        {/* Zone 2: Phone Preview (5 cols) */}
+        <Card padding="md" className="lg:col-span-5 space-y-4 flex flex-col items-center">
           <div className="w-full flex items-center justify-between pb-3 border-b border-slate-100">
             <span className="text-xs font-bold text-slate-800">Phone Live Preview</span>
 
@@ -428,26 +366,16 @@ export default function CardBuilderPage() {
                 
                 {/* Header */}
                 <div className="text-center space-y-2">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={title}
-                      className="w-16 h-16 rounded-full object-cover mx-auto shadow-xs border-2 border-white ring-1 ring-slate-200"
-                    />
-                  ) : (
-                    <div
-                      className="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-extrabold text-white text-xl shadow-xs"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      {title?.charAt(0).toUpperCase() || 'A'}
-                    </div>
-                  )}
+                  <Avatar
+                    src={avatarUrl}
+                    name={title || 'Your Name'}
+                    size="xl"
+                    accentColor={primaryColor}
+                    className="mx-auto"
+                  />
 
                   <div>
-                    <div className="flex items-center justify-center space-x-1">
-                      <h3 className="text-base font-extrabold text-slate-900">{title || 'Your Name'}</h3>
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    </div>
+                    <h3 className="text-base font-extrabold text-slate-900">{title || 'Your Name'}</h3>
                     {(designation || company) && (
                       <p className="text-xs font-semibold text-slate-600 mt-0.5">
                         {designation}
@@ -468,7 +396,7 @@ export default function CardBuilderPage() {
                 {/* Action Suite */}
                 <div className="space-y-1.5 pt-1">
                   <div
-                    className="w-full text-center py-2.5 rounded-xl font-bold text-[11px] text-white shadow-xs flex items-center justify-center space-x-1.5"
+                    className="w-full text-center py-2.5 rounded-xl font-bold text-[11px] text-white shadow-2xs flex items-center justify-center space-x-1.5"
                     style={{ backgroundColor: primaryColor }}
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -516,178 +444,142 @@ export default function CardBuilderPage() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* Zone 3: Section Editor Pane (4 cols) */}
-        <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+        {/* Zone 3: Editor Form (4 cols) */}
+        <Card padding="md" className="lg:col-span-4 space-y-4">
           
           {/* Profile Section */}
           {activeSection === 'profile' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
                 Profile Information
               </h3>
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Card Title / Full Name</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Card Title / Full Name"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase">Designation</label>
-                  <input
-                    type="text"
-                    value={designation}
-                    onChange={(e) => setDesignation(e.target.value)}
-                    placeholder="e.g. Founder"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                  />
-                </div>
+                <Input
+                  label="Designation"
+                  type="text"
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  placeholder="e.g. Founder"
+                />
 
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase">Company</label>
-                  <input
-                    type="text"
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    placeholder="e.g. Alpha"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Profile Photo URL (Optional)</label>
-                <input
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
+                <Input
+                  label="Company"
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="e.g. Alpha"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Bio / Summary</label>
-                <textarea
-                  rows={3}
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Short professional summary..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Profile Photo URL (Optional)"
+                type="url"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://example.com/photo.jpg"
+              />
+
+              <Textarea
+                label="Bio / Summary"
+                rows={3}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Short professional summary..."
+              />
             </div>
           )}
 
           {/* Contact Section */}
           {activeSection === 'contact' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
                 Direct Contact Information
               </h3>
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Phone Number</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Phone Number"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Website URL</label>
-                <input
-                  type="url"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://yourdomain.com"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Website URL"
+                type="url"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                placeholder="https://yourdomain.com"
+              />
             </div>
           )}
 
           {/* Social Section */}
           {activeSection === 'social' && (
             <div className="space-y-3">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
                 Social & Online Handles
               </h3>
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase">LinkedIn Profile</label>
-                <input
-                  type="text"
-                  value={socialLinkedin}
-                  onChange={(e) => setSocialLinkedin(e.target.value)}
-                  placeholder="linkedin.com/in/username"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="LinkedIn Profile"
+                type="text"
+                value={socialLinkedin}
+                onChange={(e) => setSocialLinkedin(e.target.value)}
+                placeholder="linkedin.com/in/username"
+              />
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase">Twitter / X Handle</label>
-                <input
-                  type="text"
-                  value={socialTwitter}
-                  onChange={(e) => setSocialTwitter(e.target.value)}
-                  placeholder="x.com/username"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Twitter / X Handle"
+                type="text"
+                value={socialTwitter}
+                onChange={(e) => setSocialTwitter(e.target.value)}
+                placeholder="x.com/username"
+              />
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase">Instagram Link</label>
-                <input
-                  type="text"
-                  value={socialInstagram}
-                  onChange={(e) => setSocialInstagram(e.target.value)}
-                  placeholder="instagram.com/username"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="Instagram Link"
+                type="text"
+                value={socialInstagram}
+                onChange={(e) => setSocialInstagram(e.target.value)}
+                placeholder="instagram.com/username"
+              />
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase">WhatsApp Link / Number</label>
-                <input
-                  type="text"
-                  value={socialWhatsapp}
-                  onChange={(e) => setSocialWhatsapp(e.target.value)}
-                  placeholder="+15550000000"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                />
-              </div>
+              <Input
+                label="WhatsApp Link / Number"
+                type="text"
+                value={socialWhatsapp}
+                onChange={(e) => setSocialWhatsapp(e.target.value)}
+                placeholder="+15550000000"
+              />
             </div>
           )}
 
           {/* Theme Section */}
           {activeSection === 'theme' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
                 Brand Palette & Theme
               </h3>
 
               <div className="space-y-2">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Primary Accent Color</label>
+                <label className="block text-xs font-semibold text-slate-700">Primary Accent Color</label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="color"
@@ -695,11 +587,11 @@ export default function CardBuilderPage() {
                     onChange={(e) => setPrimaryColor(e.target.value)}
                     className="w-8 h-8 rounded-xl border border-slate-200 cursor-pointer p-0.5"
                   />
-                  <input
+                  <Input
                     type="text"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-24 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-900"
+                    className="w-28 font-mono text-xs"
                   />
                 </div>
 
@@ -721,28 +613,21 @@ export default function CardBuilderPage() {
           {/* Privacy Section */}
           {activeSection === 'privacy' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
                 Vanity URL Alias
               </h3>
 
-              <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-700 uppercase">Custom Vanity Slug</label>
-                <div className="flex items-center">
-                  <span className="px-3 py-2 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-xs font-mono text-slate-500">
-                    alpha.me/c/
-                  </span>
-                  <input
-                    type="text"
-                    value={vanitySlug}
-                    onChange={(e) => setVanitySlug(e.target.value)}
-                    placeholder="my-alias"
-                    className="w-full px-3 py-2 rounded-r-xl border border-slate-200 text-xs text-slate-900 font-mono focus:outline-none"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Custom Vanity Slug"
+                type="text"
+                value={vanitySlug}
+                onChange={(e) => setVanitySlug(e.target.value)}
+                placeholder="my-alias"
+                helperText="Permanent public URL will resolve to alpha.me/c/my-alias"
+              />
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );
