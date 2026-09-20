@@ -14,13 +14,15 @@ class EntitlementEngine {
        WHERE s.workspace_id = $1 AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')`, [workspaceId]);
         let baseEntitlements = {};
         if (subRes.rowCount && subRes.rowCount > 0) {
-            baseEntitlements = subRes.rows[0].entitlements_schema;
+            const raw = subRes.rows[0].entitlements_schema;
+            baseEntitlements = typeof raw === 'string' ? JSON.parse(raw) : raw;
         }
         else {
             // Fallback to Free Personal Plan Defaults
             const freePlanRes = await (0, database_1.query)(`SELECT entitlements_schema FROM plans WHERE id = 'plan_free_personal'`);
             if (freePlanRes.rowCount && freePlanRes.rowCount > 0) {
-                baseEntitlements = freePlanRes.rows[0].entitlements_schema;
+                const raw = freePlanRes.rows[0].entitlements_schema;
+                baseEntitlements = typeof raw === 'string' ? JSON.parse(raw) : raw;
             }
         }
         return baseEntitlements;

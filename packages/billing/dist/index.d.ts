@@ -24,6 +24,8 @@ export interface IBillingProvider {
 export declare class StripeAdapter implements IBillingProvider {
     providerName: PaymentProvider;
     private secretKey;
+    private stripe;
+    private frontendUrl;
     constructor();
     createSubscription(params: CreateSubscriptionParams): Promise<SubscriptionResultDto>;
     cancelSubscription(providerSubscriptionId: string, atPeriodEnd: boolean): Promise<boolean>;
