@@ -17,12 +17,14 @@ export class EntitlementEngine {
     let baseEntitlements: Record<string, any> = {};
 
     if (subRes.rowCount && subRes.rowCount > 0) {
-      baseEntitlements = subRes.rows[0].entitlements_schema;
+      const raw = subRes.rows[0].entitlements_schema;
+      baseEntitlements = typeof raw === 'string' ? JSON.parse(raw) : raw;
     } else {
       // Fallback to Free Personal Plan Defaults
       const freePlanRes = await query(`SELECT entitlements_schema FROM plans WHERE id = 'plan_free_personal'`);
       if (freePlanRes.rowCount && freePlanRes.rowCount > 0) {
-        baseEntitlements = freePlanRes.rows[0].entitlements_schema;
+        const raw = freePlanRes.rows[0].entitlements_schema;
+        baseEntitlements = typeof raw === 'string' ? JSON.parse(raw) : raw;
       }
     }
 

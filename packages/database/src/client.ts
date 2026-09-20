@@ -287,6 +287,18 @@ async function initMemDbSchema(memPool: any) {
           created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS billing_webhook_deliveries (
+          id UUID PRIMARY KEY,
+          provider VARCHAR(32) NOT NULL,
+          provider_event_id VARCHAR(128) NOT NULL UNIQUE,
+          event_type VARCHAR(64) NOT NULL,
+          payload JSONB NOT NULL,
+          status VARCHAR(32) NOT NULL,
+          processed_at TIMESTAMPTZ,
+          error_message TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS nfc_devices (
           id UUID PRIMARY KEY,
           device_uid VARCHAR(128) NOT NULL UNIQUE,

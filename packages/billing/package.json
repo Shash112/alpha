@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@alpha/config": "1.0.0",
-    "@alpha/types": "1.0.0"
+    "@alpha/types": "1.0.0",
+    "stripe": "^22.6.2"
   }
 }

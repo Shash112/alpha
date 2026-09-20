@@ -157,7 +157,11 @@ export default function BillingPage() {
 
       const data = await res.json();
       if (res.ok) {
-        alert(`Checkout Session Initialized via ${provider} (${currency} ${symbol})! Session ID: ${data.providerSubscriptionId}`);
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          alert(`Checkout Session Initialized via ${provider} (${currency} ${symbol})! Session ID: ${data.providerSubscriptionId}`);
+        }
       } else {
         alert(data.message || 'Billing error');
       }
