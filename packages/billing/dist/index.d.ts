@@ -5,6 +5,7 @@ export interface CreateSubscriptionParams {
     customerEmail: string;
     customerName: string;
     currency?: Currency;
+    stripePriceId?: string;
 }
 export interface SubscriptionResultDto {
     providerSubscriptionId: string;

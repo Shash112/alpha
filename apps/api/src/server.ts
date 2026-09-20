@@ -1186,7 +1186,7 @@ export function createServer() {
     if (env.STRIPE_SECRET_KEY && !env.STRIPE_SECRET_KEY.includes('mock') && sig) {
       try {
         const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any });
-        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        event = stripe.webhooks.constructEvent(rawBody, sig || '', webhookSecret || '');
       } catch (err: any) {
         console.error(`❌ Stripe Webhook Signature Verification Failed: ${err.message}`);
         return sendError(res, 400, 'INVALID_INPUT', `Webhook signature verification failed: ${err.message}`);
@@ -1195,8 +1195,8 @@ export function createServer() {
       const adapter = new StripeAdapter();
       const isValid = adapter.verifyWebhookSignature(
         typeof rawBody === 'string' ? rawBody : rawBody.toString('utf8'),
-        sig,
-        webhookSecret
+        sig || '',
+        webhookSecret || ''
       );
       if (sig && !isValid) {
         return sendError(res, 400, 'INVALID_INPUT', 'Webhook signature mismatch.');

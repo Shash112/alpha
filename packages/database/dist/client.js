@@ -263,7 +263,7 @@ async function initMemDbSchema(memPool) {
           name VARCHAR(100) NOT NULL,
           billing_period VARCHAR(16) NOT NULL,
           prices_schema JSONB NOT NULL DEFAULT '{"USD": 0, "EUR": 0, "GBP": 0, "INR": 0}',
-          price_inr INT NOT NULL DEFAULT 0,
+          stripe_price_ids JSONB DEFAULT '{}',
           entitlements_schema JSONB NOT NULL,
           is_active BOOLEAN NOT NULL DEFAULT TRUE
       );
@@ -358,8 +358,8 @@ async function initMemDbSchema(memPool) {
     `);
         // Seed default plan
         await memPool.query(`
-      INSERT INTO plans (id, family, name, billing_period, price_inr, entitlements_schema)
-      VALUES ('plan_business_annual', 'Business', 'Business Plan', 'ANNUAL', 999900, '{"cards.max_active_count":100}')
+      INSERT INTO plans (id, family, name, billing_period, prices_schema, stripe_price_ids, entitlements_schema)
+      VALUES ('plan_business_annual', 'Business', 'Business Plan', 'ANNUAL', '{"USD":49900,"EUR":46900,"GBP":39900,"INR":999900}', '{"USD":"price_1P_business_annual_usd"}', '{"cards.max_active_count":100}')
       ON CONFLICT (id) DO NOTHING
     `);
         // Seed default demo user: shashank@alpha.com / Password123!

@@ -36,18 +36,12 @@ class StripeAdapter {
         };
         const planPrices = priceMap[params.planId] || priceMap.plan_personal_pro;
         const amountCents = planPrices[currency] || planPrices.USD || 4900;
+        const stripePriceId = params.stripePriceId || process.env[`STRIPE_PRICE_ID_${params.planId.toUpperCase()}_${currency}`];
         if (this.stripe) {
             try {
-                const session = await this.stripe.checkout.sessions.create({
-                    mode: 'subscription',
-                    payment_method_types: ['card'],
-                    customer_email: params.customerEmail,
-                    client_reference_id: params.workspaceId,
-                    metadata: {
-                        workspace_id: params.workspaceId,
-                        plan_id: params.planId
-                    },
-                    line_items: [
+                const lineItems = (stripePriceId && stripePriceId.startsWith('price_'))
+                    ? [{ price: stripePriceId, quantity: 1 }]
+                    : [
                         {
                             price_data: {
                                 currency: currency.toLowerCase(),
@@ -60,7 +54,17 @@ class StripeAdapter {
                             },
                             quantity: 1
                         }
-                    ],
+                    ];
+                const session = await this.stripe.checkout.sessions.create({
+                    mode: 'subscription',
+                    payment_method_types: ['card'],
+                    customer_email: params.customerEmail,
+                    client_reference_id: params.workspaceId,
+                    metadata: {
+                        workspace_id: params.workspaceId,
+                        plan_id: params.planId
+                    },
+                    line_items: lineItems,
                     success_url: `${this.frontendUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`,
                     cancel_url: `${this.frontendUrl}/dashboard/billing?canceled=true`
                 });
