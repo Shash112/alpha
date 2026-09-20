@@ -15,6 +15,8 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<any>({
     views: 0,
@@ -31,7 +33,7 @@ export default function AnalyticsPage() {
     const wsId = localStorage.getItem('activeWorkspaceId');
     if (!token || !wsId) return;
 
-    fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards`, {
+    fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -40,7 +42,7 @@ export default function AnalyticsPage() {
         const totalViews = cards.reduce((sum: number, c: any) => sum + (c.view_count || 0), 0);
         const totalClicks = cards.reduce((sum: number, c: any) => sum + (c.click_count || 0), 0);
 
-        fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/leads`, {
+        fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/leads`, {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then((lRes) => lRes.json())

@@ -17,6 +17,8 @@ import {
   Zap
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function ContactPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [fullName, setFullName] = useState('');
@@ -33,7 +35,7 @@ export default function ContactPage() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:4000/api/v1/contact/submit', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/contact/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, subject, message })

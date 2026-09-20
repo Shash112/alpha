@@ -27,6 +27,7 @@ import {
 import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
 import { UserMenu } from '@/components/UserMenu';
 import { GlobalSearchModal } from '@/components/GlobalSearchModal';
+import { API_BASE_URL } from '@/lib/apiConfig';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    fetch('http://localhost:4000/api/v1/auth/me', {
+    fetch(`${API_BASE_URL}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => res.json())

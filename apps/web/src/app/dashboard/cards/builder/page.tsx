@@ -24,6 +24,8 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function CardBuilderPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -59,7 +61,7 @@ export default function CardBuilderPage() {
     if (!token || !wsId) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -122,7 +124,7 @@ export default function CardBuilderPage() {
     const wsId = localStorage.getItem('activeWorkspaceId');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards/${selectedCardId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards/${selectedCardId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

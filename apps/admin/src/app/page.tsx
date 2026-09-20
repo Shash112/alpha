@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { API_BASE_URL } from '../lib/apiConfig';
 import {
   Users,
   Building,
@@ -29,7 +30,7 @@ export default function AdminConsolePage() {
 
   const fetchKpis = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/v1/admin/kpis');
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/kpis`);
       const data = await res.json();
       if (res.ok && data.data) {
         setKpis(data.data);
@@ -52,7 +53,7 @@ export default function AdminConsolePage() {
     setErrorMessage('');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/admin/cards/${suspendPublicId}/suspend`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/cards/${suspendPublicId}/suspend`, {
         method: 'POST'
       });
 

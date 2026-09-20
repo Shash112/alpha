@@ -18,6 +18,8 @@ import {
   X
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function WorkspaceSettingsPage() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || 'general';
@@ -37,7 +39,7 @@ export default function WorkspaceSettingsPage() {
     if (!token || !wsId) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -49,7 +51,7 @@ export default function WorkspaceSettingsPage() {
       }
 
       // Fetch Members
-      const mRes = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/members`, {
+      const mRes = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/members`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const mData = await mRes.json();
@@ -73,7 +75,7 @@ export default function WorkspaceSettingsPage() {
     const wsId = localStorage.getItem('activeWorkspaceId');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/settings`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ export default function WorkspaceSettingsPage() {
     const wsId = localStorage.getItem('activeWorkspaceId');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/members/invite`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/members/invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -20,6 +20,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function PublicCardPage() {
   const params = useParams();
   const publicId = params.publicId as string;
@@ -38,7 +40,7 @@ export default function PublicCardPage() {
   useEffect(() => {
     if (!publicId) return;
 
-    fetch(`http://localhost:4000/api/v1/public/cards/id/${publicId}`)
+    fetch(`${API_BASE_URL}/api/v1/public/cards/id/${publicId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.publicId) {
@@ -54,7 +56,7 @@ export default function PublicCardPage() {
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/public/cards/${publicId}/leads`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/public/cards/${publicId}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: leadName, email: leadEmail, phone: leadPhone, company: leadCompany })
@@ -73,10 +75,10 @@ export default function PublicCardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F9FC] text-slate-500 font-sans">
-        <div className="flex items-center space-x-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-subtle">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
-          <span className="text-sm font-semibold text-navy-900">Loading Digital Profile...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] text-slate-500 font-sans p-4">
+        <div className="flex items-center space-x-3 bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+          <span className="text-xs font-semibold text-slate-700">Loading Profile...</span>
         </div>
       </div>
     );
@@ -84,13 +86,13 @@ export default function PublicCardPage() {
 
   if (error || !card) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F9FC] p-6 text-center font-sans">
-        <div className="bg-white max-w-md p-8 rounded-3xl border border-slate-200 shadow-subtle space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 border border-rose-100 flex items-center justify-center mx-auto">
-            <AlertCircle className="w-8 h-8" />
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6 text-center font-sans">
+        <div className="bg-white max-w-md p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-navy-900">Profile Unavailable</h2>
-          <p className="text-xs text-slate-500">{error || 'This card profile is offline or unavailable.'}</p>
+          <h2 className="text-lg font-bold text-slate-900">Profile Unavailable</h2>
+          <p className="text-xs text-slate-500">{error || 'This digital card profile is offline or no longer available.'}</p>
         </div>
       </div>
     );
@@ -99,7 +101,7 @@ export default function PublicCardPage() {
   const heroSection = card.sections?.find((s: any) => s.type === 'hero');
   const contactSection = card.sections?.find((s: any) => s.type === 'contact');
 
-  const name = heroSection?.fields?.name || card.title || 'Digital Identity';
+  const name = heroSection?.fields?.name || card.title || 'Digital Profile';
   const designation = heroSection?.fields?.designation || card.sections?.designation || '';
   const company = heroSection?.fields?.company || card.sections?.company || '';
   const bio = heroSection?.fields?.bio || card.sections?.bio || '';
@@ -113,17 +115,17 @@ export default function PublicCardPage() {
   const socialYoutube = contactSection?.fields?.social_youtube || card.sections?.social_youtube || '';
   const socialWhatsapp = contactSection?.fields?.social_whatsapp || card.sections?.social_whatsapp || '';
 
-  const brandColor = card.workspaceBranding?.brandColor || card.themeColor || '#2563EB';
+  const brandColor = card.workspaceBranding?.brandColor || card.themeColor || '#1E293B';
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-navy-900 flex flex-col items-center justify-between p-4 sm:p-6 font-sans relative">
-      {/* Container Mobile Card */}
-      <main className="bg-white w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-dropdown space-y-6 my-auto relative">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col items-center justify-between p-4 sm:p-6 font-sans relative">
+      {/* Container Card */}
+      <main className="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-6 my-auto relative">
         
         {/* Profile Avatar & Header */}
         <div className="text-center space-y-3">
           <div
-            className="h-24 w-24 rounded-full mx-auto flex items-center justify-center font-extrabold text-3xl text-white shadow-md border-4 border-white"
+            className="h-20 w-20 rounded-full mx-auto flex items-center justify-center font-bold text-2xl text-white shadow-xs border-2 border-white"
             style={{ backgroundColor: brandColor }}
           >
             {name.charAt(0)}
@@ -131,18 +133,18 @@ export default function PublicCardPage() {
 
           <div>
             <div className="flex items-center justify-center space-x-1.5">
-              <h1 className="text-2xl font-extrabold text-navy-900 tracking-tight">{name}</h1>
-              <ShieldCheck className="w-5 h-5 text-brand-600" />
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">{name}</h1>
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
             </div>
 
             {designation && (
-              <p className="text-xs font-bold mt-0.5" style={{ color: brandColor }}>
+              <p className="text-xs font-semibold mt-0.5" style={{ color: brandColor }}>
                 {designation}
               </p>
             )}
 
             {company && (
-              <p className="text-xs font-semibold text-slate-500 mt-0.5">
+              <p className="text-xs font-medium text-slate-500 mt-0.5">
                 {company}
               </p>
             )}
@@ -151,7 +153,7 @@ export default function PublicCardPage() {
 
         {/* Bio */}
         {bio && (
-          <p className="text-xs text-slate-600 text-center leading-relaxed px-2 bg-surface-secondary p-3 rounded-xl border border-slate-100 italic">
+          <p className="text-xs text-slate-600 text-center leading-relaxed px-3 py-2.5 bg-slate-50 rounded-xl border border-slate-100">
             "{bio}"
           </p>
         )}
@@ -159,9 +161,9 @@ export default function PublicCardPage() {
         {/* Primary CTAs */}
         <div className="grid grid-cols-2 gap-3 pt-1">
           <a
-            href={`http://localhost:4000/api/v1/public/cards/${publicId}/vcard`}
+            href={`${API_BASE_URL}/api/v1/public/cards/${publicId}/vcard`}
             download
-            className="w-full py-3 rounded-xl text-xs font-bold text-white text-center shadow-xs transition active:scale-95 flex items-center justify-center space-x-2"
+            className="w-full py-2.5 rounded-xl text-xs font-semibold text-white text-center shadow-xs transition hover:opacity-90 active:scale-95 flex items-center justify-center space-x-2"
             style={{ backgroundColor: brandColor }}
           >
             <Download className="w-4 h-4" />
@@ -170,7 +172,7 @@ export default function PublicCardPage() {
 
           <button
             onClick={() => setShowLeadModal(true)}
-            className="w-full py-3 rounded-xl text-xs font-bold text-navy-900 bg-surface-secondary border border-slate-200 hover:bg-slate-100 transition active:scale-95 flex items-center justify-center space-x-2"
+            className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200 hover:bg-slate-200 transition active:scale-95 flex items-center justify-center space-x-2"
           >
             <Share2 className="w-4 h-4 text-slate-600" />
             <span>Exchange</span>

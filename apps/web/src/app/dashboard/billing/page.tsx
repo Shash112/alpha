@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   CreditCard,
   Check,
@@ -9,8 +10,10 @@ import {
   Building,
   Sparkles,
   ArrowRight,
-  Globe
+  Globe,
+  CheckCircle2
 } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/apiConfig';
 
 type Currency = 'USD' | 'EUR' | 'GBP' | 'INR' | 'CAD' | 'AUD';
 
@@ -59,10 +62,19 @@ const PLAN_PRICES: Record<string, Record<Currency, { monthly: number; annual: nu
 };
 
 export default function BillingPage() {
+  const searchParams = useSearchParams();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [currency, setCurrency] = useState<Currency>('USD');
-  const [currentPlan] = useState<string>('Free Personal');
+  const [currentPlan, setCurrentPlan] = useState<string>('Free Personal');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      setShowUpgradeSuccess(true);
+      setCurrentPlan('Personal Pro');
+    }
+  }, [searchParams]);
 
   const symbol = CURRENCY_SYMBOLS[currency];
 
@@ -79,7 +91,7 @@ export default function BillingPage() {
         'Alpha Platform Branding'
       ],
       cta: 'Current Plan',
-      isCurrent: true,
+      isCurrent: currentPlan === 'Free Personal',
       highlight: false
     },
     {
@@ -97,7 +109,7 @@ export default function BillingPage() {
         'Priority Support'
       ],
       cta: 'Upgrade to Pro',
-      isCurrent: false,
+      isCurrent: currentPlan === 'Personal Pro',
       highlight: true
     },
     {
@@ -142,7 +154,7 @@ export default function BillingPage() {
 
     try {
       const provider = currency === 'INR' ? 'RAZORPAY' : 'STRIPE';
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/billing/checkout`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/billing/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +172,8 @@ export default function BillingPage() {
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {
-          alert(`Checkout Session Initialized via ${provider} (${currency} ${symbol})! Session ID: ${data.providerSubscriptionId}`);
+          setShowUpgradeSuccess(true);
+          setCurrentPlan('Personal Pro');
         }
       } else {
         alert(data.message || 'Billing error');
@@ -175,6 +188,25 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Upgrade Success Notification Banner */}
+      {showUpgradeSuccess && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-xs">
+          <div className="flex items-center space-x-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div>
+              <p className="text-xs font-bold text-emerald-900">You're Upgraded!</p>
+              <p className="text-xs text-emerald-700">Your account now has Personal Pro features enabled (up to 5 active cards, advanced analytics, and custom branding).</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowUpgradeSuccess(false)}
+            className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 px-2 py-1"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

@@ -17,6 +17,8 @@ import {
   FileText
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function LeadsContactsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ export default function LeadsContactsPage() {
     if (!token || !wsId) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/leads`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/leads`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

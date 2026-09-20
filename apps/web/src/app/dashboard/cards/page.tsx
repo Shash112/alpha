@@ -20,6 +20,8 @@ import {
   LayoutGrid
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function MyCardsPage() {
   const router = useRouter();
   const [cards, setCards] = useState<any[]>([]);
@@ -38,7 +40,7 @@ export default function MyCardsPage() {
     if (!token || !wsId) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -83,7 +85,7 @@ export default function MyCardsPage() {
     const targetSlug = templateSlugMap[selectedTemplate] || 'corporate-executive';
 
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

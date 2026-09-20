@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Plus, Shield, Mail, Check, X } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/apiConfig';
 
 export default function TeamPage() {
   const [members, setMembers] = useState<any[]>([]);
@@ -12,7 +13,7 @@ export default function TeamPage() {
     const wsId = localStorage.getItem('activeWorkspaceId');
     if (!token || !wsId) return;
 
-    fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/members`, {
+    fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/members`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => res.json())

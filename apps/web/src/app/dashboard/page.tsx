@@ -22,6 +22,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+import { API_BASE_URL } from '@/lib/apiConfig';
+
 export default function OverviewDashboardPage() {
   const [cards, setCards] = useState<any[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
@@ -38,7 +40,7 @@ export default function OverviewDashboardPage() {
     if (!token || !wsId) return;
 
     // Fetch User Profile
-    fetch('http://localhost:4000/api/v1/auth/me', {
+    fetch(`${API_BASE_URL}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -48,7 +50,7 @@ export default function OverviewDashboardPage() {
       .catch((err) => console.error(err));
 
     // Fetch Workspace Cards
-    fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/cards`, {
+    fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/cards`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -61,7 +63,7 @@ export default function OverviewDashboardPage() {
         const totalClicks = loadedCards.reduce((sum: number, c: any) => sum + (c.click_count || 0), 0);
 
         // Fetch Leads
-        fetch(`http://localhost:4000/api/v1/workspaces/${wsId}/leads`, {
+        fetch(`${API_BASE_URL}/api/v1/workspaces/${wsId}/leads`, {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then((lRes) => lRes.json())
