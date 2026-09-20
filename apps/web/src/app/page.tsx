@@ -32,8 +32,10 @@ import {
   Zap
 } from 'lucide-react';
 
+import { MarketingHeader } from '@/components/layout/MarketingHeader';
+import { MarketingFooter } from '@/components/layout/MarketingFooter';
+
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -147,91 +149,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
-      {/* Navbar Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/alpha-logo.png"
-              alt="Alpha"
-              width={120}
-              height={32}
-              className="h-8 w-auto object-contain"
-              priority
-            />
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-            <Link href="#features" className="hover:text-blue-600 transition-colors">Product</Link>
-            <Link href="#solutions" className="hover:text-blue-600 transition-colors">Solutions</Link>
-            <Link href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</Link>
-            <Link href="#resources" className="hover:text-blue-600 transition-colors">Resources</Link>
-            <Link href="#contact" className="hover:text-blue-600 transition-colors">Contact</Link>
-          </nav>
-
-          {/* Right Action Buttons */}
-          <div className="hidden md:flex items-center space-x-5">
-            <button
-              aria-label="Search"
-              className="text-slate-500 hover:text-slate-800 transition p-2 rounded-full hover:bg-slate-100"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-1.5"
-            >
-              <span>Get started</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {/* Mobile Right Controls */}
-          <div className="flex items-center space-x-3 md:hidden">
-            <Link
-              href="/register"
-              className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition flex items-center gap-1"
-            >
-              <span>Get started</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl transition"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-6 py-6 space-y-4 shadow-xl animate-in slide-in-from-top duration-200">
-            <nav className="flex flex-col space-y-3 text-base font-semibold text-slate-700">
-              <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600">Product</Link>
-              <Link href="#solutions" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600">Solutions</Link>
-              <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600">Pricing</Link>
-              <Link href="#resources" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600">Resources</Link>
-              <Link href="#contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600">Contact</Link>
-            </nav>
-            <div className="pt-4 border-t border-slate-100 flex flex-col space-y-3">
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
+      <MarketingHeader currentPath="/" />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-white to-white pt-10 sm:pt-16 pb-12 lg:pb-20">
@@ -881,85 +799,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="bg-slate-950 text-slate-300 pt-16 pb-12 border-t border-slate-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-900">
-            
-            {/* Brand Column */}
-            <div className="lg:col-span-2 space-y-4">
-              <Link href="/" className="flex items-center gap-2">
-                <Image
-                  src="/alpha-logo-white.png"
-                  alt="Alpha"
-                  width={130}
-                  height={36}
-                  className="h-9 w-auto object-contain"
-                />
-              </Link>
-              <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
-                People. Connections. Opportunities. Growth.
-              </p>
-              <div className="flex space-x-4 pt-2">
-                <a href="#" className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition" aria-label="LinkedIn">
-                  in
-                </a>
-                <a href="#" className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition" aria-label="X Twitter">
-                  𝕏
-                </a>
-                <a href="#" className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition" aria-label="Instagram">
-                  📸
-                </a>
-                <a href="#" className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition" aria-label="YouTube">
-                  ▶
-                </a>
-              </div>
-            </div>
-
-            {/* Column 1: Product */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white">Product</h4>
-              <ul className="space-y-2.5 text-sm text-slate-400">
-                <li><Link href="#features" className="hover:text-white transition">Features</Link></li>
-                <li><Link href="#pricing" className="hover:text-white transition">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Integrations</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Changelog</Link></li>
-              </ul>
-            </div>
-
-            {/* Column 2: Solutions */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white">Solutions</h4>
-              <ul className="space-y-2.5 text-sm text-slate-400">
-                <li><Link href="#solutions" className="hover:text-white transition">Individuals</Link></li>
-                <li><Link href="#solutions" className="hover:text-white transition">Teams</Link></li>
-                <li><Link href="#solutions" className="hover:text-white transition">Businesses</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Agencies</Link></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Resources */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white">Resources</h4>
-              <ul className="space-y-2.5 text-sm text-slate-400">
-                <li><Link href="#" className="hover:text-white transition">Blog</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Help Center</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Guides</Link></li>
-                <li><Link href="#" className="hover:text-white transition">API Docs</Link></li>
-              </ul>
-            </div>
-
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-            <div>© 2026 Alpha Platform Inc. All rights reserved.</div>
-            <div className="flex items-center gap-1 text-slate-400">
-              <span>Designed for modern professionals worldwide.</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

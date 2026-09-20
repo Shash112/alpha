@@ -11,51 +11,7 @@ import {
 import { API_BASE_URL } from '@/lib/apiConfig';
 import { Button, Card, Badge, PageHeader, Select } from '@/components/ui';
 
-type Currency = 'USD' | 'EUR' | 'GBP' | 'INR' | 'CAD' | 'AUD';
-
-const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  INR: '₹',
-  CAD: 'CA$',
-  AUD: 'A$'
-};
-
-const PLAN_PRICES: Record<string, Record<Currency, { monthly: number; annual: number }>> = {
-  plan_free_personal: {
-    USD: { monthly: 0, annual: 0 },
-    EUR: { monthly: 0, annual: 0 },
-    GBP: { monthly: 0, annual: 0 },
-    INR: { monthly: 0, annual: 0 },
-    CAD: { monthly: 0, annual: 0 },
-    AUD: { monthly: 0, annual: 0 }
-  },
-  plan_personal_pro: {
-    USD: { monthly: 5.99, annual: 4.90 },
-    EUR: { monthly: 5.49, annual: 4.50 },
-    GBP: { monthly: 4.99, annual: 3.90 },
-    INR: { monthly: 499, annual: 399 },
-    CAD: { monthly: 7.99, annual: 6.50 },
-    AUD: { monthly: 8.49, annual: 6.90 }
-  },
-  plan_team_annual: {
-    USD: { monthly: 24.99, annual: 19.90 },
-    EUR: { monthly: 22.99, annual: 18.50 },
-    GBP: { monthly: 19.99, annual: 15.90 },
-    INR: { monthly: 2499, annual: 1999 },
-    CAD: { monthly: 32.99, annual: 26.90 },
-    AUD: { monthly: 34.99, annual: 28.90 }
-  },
-  plan_business_annual: {
-    USD: { monthly: 59.99, annual: 49.90 },
-    EUR: { monthly: 54.99, annual: 46.90 },
-    GBP: { monthly: 49.99, annual: 39.90 },
-    INR: { monthly: 9999, annual: 7999 },
-    CAD: { monthly: 79.99, annual: 67.90 },
-    AUD: { monthly: 84.99, annual: 72.90 }
-  }
-};
+import { PLANS, Currency, getPlanPrice, formatPlanPrice } from '@/lib/plans';
 
 export default function BillingPage() {
   const searchParams = useSearchParams();
@@ -71,66 +27,6 @@ export default function BillingPage() {
       setCurrentPlan('Personal Pro');
     }
   }, [searchParams]);
-
-  const symbol = CURRENCY_SYMBOLS[currency];
-
-  const plans = [
-    {
-      id: 'plan_free_personal',
-      name: 'Free Personal',
-      desc: 'Essential digital identity card for individual professionals.',
-      features: [
-        '1 Published Digital Identity Card',
-        'Standard QR Code Generator',
-        'vCard (.vcf) Export',
-        'Direct Contact Links'
-      ],
-      cta: 'Current Plan',
-      isCurrent: currentPlan === 'Free Personal'
-    },
-    {
-      id: 'plan_personal_pro',
-      name: 'Personal Pro',
-      desc: 'Full professional identity power with lead capture & custom domains.',
-      features: [
-        'Up to 5 Published Digital Cards',
-        'Custom Vanity URL Alias',
-        'Verified Custom CNAME Domain',
-        'Unlimited Lead Capture Forms',
-        'CSV Lead Export',
-        'Remove Platform Branding'
-      ],
-      cta: 'Upgrade to Pro',
-      isCurrent: currentPlan === 'Personal Pro'
-    },
-    {
-      id: 'plan_team_annual',
-      name: 'Team',
-      desc: 'Centralized card & lead management for growing teams.',
-      features: [
-        'Up to 25 Team Cards',
-        'Centralized Team Dashboard',
-        'Unified Domain Mapping',
-        'Team Member Invitations',
-        'Shared Lead CRM Access'
-      ],
-      cta: 'Choose Team Plan',
-      isCurrent: false
-    },
-    {
-      id: 'plan_business_annual',
-      name: 'Business',
-      desc: 'Custom corporate platform, SSO & white-label digital identity.',
-      features: [
-        'Up to 100 Corporate Cards',
-        'Full White-label Branding',
-        'SAML / OIDC Single Sign-On',
-        'Dedicated SLA & Support'
-      ],
-      cta: 'Choose Business Plan',
-      isCurrent: false
-    }
-  ];
 
   const handleUpgrade = async (planId: string) => {
     if (planId === 'plan_free_personal') return;
@@ -253,10 +149,10 @@ export default function BillingPage() {
 
       {/* Plans Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {plans.map((plan) => {
-          const planPricing = PLAN_PRICES[plan.id]?.[currency] || { monthly: 0, annual: 0 };
-          const priceVal = billingCycle === 'annual' ? planPricing.annual : planPricing.monthly;
-          const priceDisplay = priceVal === 0 ? 'Free' : `${symbol}${priceVal.toLocaleString()}`;
+        {PLANS.map((plan) => {
+          const priceVal = getPlanPrice(plan, currency, billingCycle);
+          const priceDisplay = formatPlanPrice(plan, currency, billingCycle);
+          const isCurrent = (plan.key === 'free' && currentPlan === 'Free Personal') || (plan.key === 'pro' && currentPlan === 'Personal Pro');
 
           return (
             <Card
@@ -267,7 +163,7 @@ export default function BillingPage() {
               <div className="space-y-4">
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
-                  <p className="text-xs text-slate-500 font-normal leading-relaxed">{plan.desc}</p>
+                  <p className="text-xs text-slate-500 font-normal leading-relaxed">{plan.description}</p>
                 </div>
 
                 <div className="flex items-baseline space-x-1">
@@ -288,11 +184,11 @@ export default function BillingPage() {
 
               <Button
                 fullWidth
-                variant={plan.isCurrent ? 'outline' : 'primary'}
-                disabled={plan.isCurrent || isProcessing}
+                variant={isCurrent ? 'outline' : 'primary'}
+                disabled={isCurrent || isProcessing}
                 onClick={() => handleUpgrade(plan.id)}
               >
-                {plan.isCurrent ? 'Current Plan' : plan.cta}
+                {isCurrent ? 'Current Plan' : (plan.key === 'pro' ? 'Upgrade to Pro' : `Choose ${plan.name}`)}
               </Button>
             </Card>
           );

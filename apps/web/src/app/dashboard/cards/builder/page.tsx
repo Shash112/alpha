@@ -21,6 +21,7 @@ import {
 
 import { API_BASE_URL } from '@/lib/apiConfig';
 import { Button, Input, Textarea, Select, Card, Badge, Avatar } from '@/components/ui';
+import { PublicCardView } from '@/components/card/PublicCardView';
 
 export default function CardBuilderPage() {
   const searchParams = useSearchParams();
@@ -362,85 +363,29 @@ export default function CardBuilderPage() {
           {/* High-Fidelity Phone Preview matching Public Card */}
           <div className={`w-full transition-all duration-300 ${deviceView === 'mobile' ? 'max-w-xs' : 'max-w-md'}`}>
             <div className="rounded-[2.5rem] border-4 border-slate-900 bg-slate-950 p-3 shadow-xl">
-              <div className="bg-white rounded-[2rem] overflow-hidden min-h-[440px] p-5 text-slate-900 space-y-4">
-                
-                {/* Header */}
-                <div className="text-center space-y-2">
-                  <Avatar
-                    src={avatarUrl}
-                    name={title || 'Your Name'}
-                    size="xl"
-                    accentColor={primaryColor}
-                    className="mx-auto"
-                  />
-
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900">{title || 'Your Name'}</h3>
-                    {(designation || company) && (
-                      <p className="text-xs font-semibold text-slate-600 mt-0.5">
-                        {designation}
-                        {designation && company ? ' • ' : ''}
-                        {company && <span className="text-slate-500 font-normal">{company}</span>}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Bio */}
-                {bio && (
-                  <p className="text-[11px] text-slate-500 text-center font-normal leading-relaxed px-2">
-                    {bio}
-                  </p>
-                )}
-
-                {/* Action Suite */}
-                <div className="space-y-1.5 pt-1">
-                  <div
-                    className="w-full text-center py-2.5 rounded-xl font-bold text-[11px] text-white shadow-2xs flex items-center justify-center space-x-1.5"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Save Contact</span>
-                  </div>
-                  <div className="w-full text-center py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-[11px] bg-slate-50 flex items-center justify-center space-x-1.5">
-                    <Share2 className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Exchange Details</span>
-                  </div>
-                </div>
-
-                {/* Clean Contact Rows */}
-                {(phone || email || website) && (
-                  <div className="space-y-1 pt-2 border-t border-slate-100 text-xs">
-                    {phone && (
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
-                        <div className="flex items-center space-x-2 truncate">
-                          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{phone}</span>
-                        </div>
-                        <span className="text-[9px] text-slate-400 font-medium">Call</span>
-                      </div>
-                    )}
-                    {email && (
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
-                        <div className="flex items-center space-x-2 truncate">
-                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{email}</span>
-                        </div>
-                        <span className="text-[9px] text-slate-400 font-medium">Email</span>
-                      </div>
-                    )}
-                    {website && (
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-[11px] text-slate-800">
-                        <div className="flex items-center space-x-2 truncate">
-                          <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{website}</span>
-                        </div>
-                        <span className="text-[9px] text-slate-400 font-medium">Website</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
+              <div className="bg-white rounded-[2rem] overflow-hidden min-h-[440px]">
+                <PublicCardView
+                  name={title}
+                  designation={designation}
+                  company={company}
+                  bio={bio}
+                  avatarUrl={avatarUrl}
+                  phone={phone}
+                  email={email}
+                  website={website}
+                  socials={{
+                    linkedin: socialLinkedin,
+                    twitter: socialTwitter,
+                    instagram: socialInstagram,
+                    github: socialGithub,
+                    youtube: socialYoutube,
+                    whatsapp: socialWhatsapp
+                  }}
+                  brandAccent={primaryColor}
+                  publicId={activeCard?.public_id || activeCard?.id}
+                  canonicalUrl={activeCard?.canonicalUrl || (vanitySlug ? `alpha.me/c/${vanitySlug}` : undefined)}
+                  isPreview={true}
+                />
               </div>
             </div>
           </div>

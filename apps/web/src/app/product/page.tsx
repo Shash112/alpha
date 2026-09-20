@@ -24,9 +24,10 @@ import {
   Smartphone
 } from 'lucide-react';
 
-export default function ProductPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+import { MarketingHeader } from '@/components/layout/MarketingHeader';
+import { MarketingFooter } from '@/components/layout/MarketingFooter';
 
+export default function ProductPage() {
   const productFeatures = [
     {
       icon: CreditCard,
@@ -104,68 +105,7 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/alpha-logo.png"
-              alt="Alpha"
-              width={120}
-              height={32}
-              className="h-8 w-auto object-contain"
-              priority
-            />
-          </Link>
-
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-            <Link href="/product" className="text-blue-600 font-bold">Product</Link>
-            <Link href="/solutions" className="hover:text-blue-600 transition-colors">Solutions</Link>
-            <Link href="/pricing" className="hover:text-blue-600 transition-colors">Pricing</Link>
-            <Link href="/resources" className="hover:text-blue-600 transition-colors">Resources</Link>
-            <Link href="/contact" className="hover:text-blue-600 transition-colors">Contact</Link>
-          </nav>
-
-          <div className="hidden md:flex items-center space-x-5">
-            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-1.5"
-            >
-              <span>Get started</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="flex items-center space-x-3 md:hidden">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl transition"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-6 py-6 space-y-4 shadow-xl">
-            <nav className="flex flex-col space-y-3 text-base font-semibold text-slate-700">
-              <Link href="/product" className="text-blue-600">Product</Link>
-              <Link href="/solutions" className="hover:text-blue-600">Solutions</Link>
-              <Link href="/pricing" className="hover:text-blue-600">Pricing</Link>
-              <Link href="/resources" className="hover:text-blue-600">Resources</Link>
-              <Link href="/contact" className="hover:text-blue-600">Contact</Link>
-            </nav>
-            <div className="pt-4 border-t border-slate-100 flex flex-col space-y-3">
-              <Link href="/login" className="w-full text-center py-3 font-semibold text-slate-700 bg-slate-100 rounded-xl">
-                Sign in
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
+      <MarketingHeader currentPath="/product" />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-blue-50/50 via-white to-white py-16 sm:py-24 border-b border-slate-100">
@@ -231,26 +171,7 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 text-slate-300 pt-16 pb-12 border-t border-slate-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-900">
-            <Link href="/">
-              <Image src="/alpha-logo-white.png" alt="Alpha" width={130} height={36} className="h-9 w-auto object-contain" />
-            </Link>
-            <div className="flex space-x-6 text-sm text-slate-400">
-              <Link href="/product" className="hover:text-white">Product</Link>
-              <Link href="/solutions" className="hover:text-white">Solutions</Link>
-              <Link href="/pricing" className="hover:text-white">Pricing</Link>
-              <Link href="/resources" className="hover:text-white">Resources</Link>
-              <Link href="/contact" className="hover:text-white">Contact</Link>
-            </div>
-          </div>
-          <div className="pt-8 text-center text-xs text-slate-500">
-            © 2026 Alpha SaaS Platform. All rights reserved. Made with ❤️ in India.
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }
