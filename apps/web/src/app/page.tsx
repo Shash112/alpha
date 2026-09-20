@@ -953,9 +953,9 @@ export default function LandingPage() {
 
           {/* Bottom Bar */}
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-            <div>© 2026 Alpha. All rights reserved.</div>
+            <div>© 2026 Alpha Platform Inc. All rights reserved.</div>
             <div className="flex items-center gap-1 text-slate-400">
-              <span>Made with ❤️ in India</span>
+              <span>Designed for modern professionals worldwide.</span>
             </div>
           </div>
         </div>
