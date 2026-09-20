@@ -64,23 +64,6 @@ export class StripeAdapter implements IBillingProvider {
 
     if (this.stripe) {
       try {
-        const lineItems = (stripePriceId && stripePriceId.startsWith('price_'))
-          ? [{ price: stripePriceId, quantity: 1 }]
-          : [
-              {
-                price_data: {
-                  currency: currency.toLowerCase(),
-                  product_data: {
-                    name: `Alpha ${params.planId.replace(/_/g, ' ').toUpperCase()}`,
-                    description: `Subscription for workspace ${params.workspaceId}`
-                  },
-                  unit_amount: amountCents,
-                  recurring: { interval: 'year' as const }
-                },
-                quantity: 1
-              }
-            ];
-
         const session = await this.stripe.checkout.sessions.create({
           mode: 'subscription',
           payment_method_types: ['card'],
@@ -90,7 +73,12 @@ export class StripeAdapter implements IBillingProvider {
             workspace_id: params.workspaceId,
             plan_id: params.planId
           },
-          line_items: lineItems,
+          line_items: [
+            {
+              price: stripePriceId,
+              quantity: 1
+            }
+          ],
           success_url: `${this.frontendUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`,
           cancel_url: `${this.frontendUrl}/dashboard/billing?canceled=true`
         });
