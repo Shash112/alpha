@@ -102,18 +102,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       ]
     },
     {
-      group: 'Workspace',
+      group: 'Workspace & Account',
       items: [
-        { name: 'Team Members', href: '/dashboard/settings?tab=team', icon: Users },
-        { name: 'Custom Domain', href: '/dashboard/settings?tab=domain', icon: Globe },
-        { name: 'Integrations', href: '/dashboard/integrations', icon: Puzzle }
-      ]
-    },
-    {
-      group: 'Account',
-      items: [
-        { name: 'Billing & Plans', href: '/dashboard/billing', icon: BillingIcon },
-        { name: 'Settings', href: '/dashboard/settings?tab=general', icon: Settings }
+        { name: 'Integrations', href: '/dashboard/integrations', icon: Puzzle },
+        { name: 'Workspace Settings', href: '/dashboard/settings', icon: Settings },
+        { name: 'Billing & Plans', href: '/dashboard/billing', icon: BillingIcon }
       ]
     }
   ];
@@ -160,7 +153,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href;
+                  const isActive = pathname === item.href || (item.href === '/dashboard/settings' && pathname.startsWith('/dashboard/settings'));
                   return (
                     <Link
                       key={item.href}
