@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Lock, Building, ArrowRight, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/apiConfig';
 
 export default function RegisterPage() {
@@ -34,7 +34,7 @@ export default function RegisterPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      if (!res.ok) throw new Error(data.message || 'Registration failed. Please check your information.');
 
       const token = data.accessToken || data.tokens?.accessToken;
       const refresh = data.refreshToken || data.tokens?.refreshToken;
@@ -54,7 +54,9 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+      <div className="w-full max-w-sm sm:max-w-md bg-white p-8 sm:p-10 rounded-2xl border border-slate-200/90 shadow-xs space-y-6">
+        
+        {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block">
             <Image
@@ -63,15 +65,15 @@ export default function RegisterPage() {
               width={120}
               height={32}
               style={{ width: 'auto', height: 'auto' }}
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-7 w-auto object-contain mx-auto"
               priority
             />
           </Link>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-navy-900 tracking-tight pt-2">
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight pt-1">
             Create Your Alpha Account
           </h1>
           <p className="text-xs text-slate-500">
-            Build your digital professional identity once, share everywhere.
+            Build & manage professional digital identity cards.
           </p>
         </div>
 
@@ -83,8 +85,10 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-navy-900 uppercase tracking-wider">Full Name</label>
+          <div className="space-y-1">
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Full Name
+            </label>
             <div className="relative">
               <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -93,13 +97,15 @@ export default function RegisterPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Jane Doe"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-navy-900 focus:border-brand-600 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-navy-900 uppercase tracking-wider">Work Email</label>
+          <div className="space-y-1">
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Work Email
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -108,13 +114,15 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jane@company.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-navy-900 focus:border-brand-600 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-navy-900 uppercase tracking-wider">Password</label>
+          <div className="space-y-1">
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Password
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -123,7 +131,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-navy-900 focus:border-brand-600 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
               />
             </div>
           </div>
@@ -131,16 +139,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-brand-600 text-white font-bold text-xs hover:bg-brand-700 active:scale-95 transition-all shadow-xs flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition shadow-xs flex items-center justify-center space-x-2 disabled:opacity-50"
           >
-            <span>{loading ? 'Creating Account...' : 'Get Started Free'}</span>
+            <span>{loading ? 'Creating Account...' : 'Get Started'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <div className="text-center text-xs text-slate-500 pt-3 border-t border-slate-100">
           Already have an account?{' '}
-          <Link href="/login" className="font-bold text-brand-600 hover:text-brand-700">
+          <Link href="/login" className="font-bold text-slate-900 hover:underline">
             Sign in
           </Link>
         </div>
