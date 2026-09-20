@@ -104,8 +104,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       group: 'Workspace',
       items: [
-        { name: 'Team Members', href: '/dashboard/team', icon: Users },
-        { name: 'Custom Domain', href: '/dashboard/domain', icon: Globe },
+        { name: 'Team Members', href: '/dashboard/settings?tab=team', icon: Users },
+        { name: 'Custom Domain', href: '/dashboard/settings?tab=domain', icon: Globe },
         { name: 'Integrations', href: '/dashboard/integrations', icon: Puzzle }
       ]
     },
@@ -113,7 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       group: 'Account',
       items: [
         { name: 'Billing & Plans', href: '/dashboard/billing', icon: BillingIcon },
-        { name: 'Settings', href: '/dashboard/settings', icon: Settings }
+        { name: 'Settings', href: '/dashboard/settings?tab=general', icon: Settings }
       ]
     }
   ];
