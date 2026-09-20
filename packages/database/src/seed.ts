@@ -37,8 +37,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Free Personal',
       name: 'Free Personal Plan',
       billing_period: 'ANNUAL',
-      price_inr: 0,
-      prices: { USD: 0, EUR: 0, GBP: 0, INR: 0, CAD: 0, AUD: 0 },
+      prices: { USD: 0, EUR: 0, GBP: 0, INR: 0, CAD: 0, AUD: 0 }, // $0
+      stripe_price_ids: { USD: null, EUR: null, GBP: null, INR: null },
       entitlements: {
         'cards.max_active_count': 1,
         'members.max_seats': 1,
@@ -55,8 +55,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Personal Pro',
       name: 'Personal Pro Plan',
       billing_period: 'ANNUAL',
-      price_inr: 49900,
       prices: { USD: 4900, EUR: 4500, GBP: 3900, INR: 49900, CAD: 6500, AUD: 6900 }, // $49.00 / year
+      stripe_price_ids: { USD: 'price_1P_personal_pro_usd', EUR: 'price_1P_personal_pro_eur' },
       entitlements: {
         'cards.max_active_count': 5,
         'members.max_seats': 1,
@@ -73,8 +73,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Team',
       name: 'Team Plan',
       billing_period: 'ANNUAL',
-      price_inr: 299900,
       prices: { USD: 19900, EUR: 18500, GBP: 15900, INR: 299900, CAD: 26900, AUD: 28900 }, // $199.00 / year
+      stripe_price_ids: { USD: 'price_1P_team_annual_usd', EUR: 'price_1P_team_annual_eur' },
       entitlements: {
         'cards.max_active_count': 25,
         'members.max_seats': 10,
@@ -91,8 +91,8 @@ export async function seedDatabase(): Promise<void> {
       family: 'Business',
       name: 'Business Plan',
       billing_period: 'ANNUAL',
-      price_inr: 999900,
       prices: { USD: 49900, EUR: 46900, GBP: 39900, INR: 999900, CAD: 67900, AUD: 72900 }, // $499.00 / year
+      stripe_price_ids: { USD: 'price_1P_business_annual_usd', EUR: 'price_1P_business_annual_eur' },
       entitlements: {
         'cards.max_active_count': 100,
         'members.max_seats': 50,
@@ -109,10 +109,10 @@ export async function seedDatabase(): Promise<void> {
 
   for (const plan of plans) {
     await query(
-      `INSERT INTO plans (id, family, name, billing_period, price_inr, prices_schema, entitlements_schema)
+      `INSERT INTO plans (id, family, name, billing_period, prices_schema, stripe_price_ids, entitlements_schema)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       ON CONFLICT (id) DO UPDATE SET price_inr = $5, prices_schema = $6, entitlements_schema = $7`,
-      [plan.id, plan.family, plan.name, plan.billing_period, plan.price_inr, JSON.stringify(plan.prices), JSON.stringify(plan.entitlements)]
+       ON CONFLICT (id) DO UPDATE SET prices_schema = $5, stripe_price_ids = $6, entitlements_schema = $7`,
+      [plan.id, plan.family, plan.name, plan.billing_period, JSON.stringify(plan.prices), JSON.stringify(plan.stripe_price_ids), JSON.stringify(plan.entitlements)]
     );
   }
 

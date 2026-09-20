@@ -9,6 +9,7 @@ export interface CreateSubscriptionParams {
   customerEmail: string;
   customerName: string;
   currency?: Currency;
+  stripePriceId?: string;
 }
 
 export interface SubscriptionResultDto {
@@ -59,9 +60,27 @@ export class StripeAdapter implements IBillingProvider {
 
     const planPrices = priceMap[params.planId] || priceMap.plan_personal_pro;
     const amountCents = planPrices[currency] || planPrices.USD || 4900;
+    const stripePriceId = params.stripePriceId || process.env[`STRIPE_PRICE_ID_${params.planId.toUpperCase()}_${currency}`];
 
     if (this.stripe) {
       try {
+        const lineItems = (stripePriceId && stripePriceId.startsWith('price_'))
+          ? [{ price: stripePriceId, quantity: 1 }]
+          : [
+              {
+                price_data: {
+                  currency: currency.toLowerCase(),
+                  product_data: {
+                    name: `Alpha ${params.planId.replace(/_/g, ' ').toUpperCase()}`,
+                    description: `Subscription for workspace ${params.workspaceId}`
+                  },
+                  unit_amount: amountCents,
+                  recurring: { interval: 'year' as const }
+                },
+                quantity: 1
+              }
+            ];
+
         const session = await this.stripe.checkout.sessions.create({
           mode: 'subscription',
           payment_method_types: ['card'],
@@ -71,20 +90,7 @@ export class StripeAdapter implements IBillingProvider {
             workspace_id: params.workspaceId,
             plan_id: params.planId
           },
-          line_items: [
-            {
-              price_data: {
-                currency: currency.toLowerCase(),
-                product_data: {
-                  name: `Alpha ${params.planId.replace(/_/g, ' ').toUpperCase()}`,
-                  description: `Subscription for workspace ${params.workspaceId}`
-                },
-                unit_amount: amountCents,
-                recurring: { interval: 'year' }
-              },
-              quantity: 1
-            }
-          ],
+          line_items: lineItems,
           success_url: `${this.frontendUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`,
           cancel_url: `${this.frontendUrl}/dashboard/billing?canceled=true`
         });

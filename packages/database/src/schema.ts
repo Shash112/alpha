@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS plans (
     name VARCHAR(100) NOT NULL,
     billing_period VARCHAR(16) NOT NULL,
     prices_schema JSONB NOT NULL DEFAULT '{"USD": 0, "EUR": 0, "GBP": 0, "INR": 0}',
-    price_inr INT NOT NULL DEFAULT 0,
+    stripe_price_ids JSONB DEFAULT '{}',
     entitlements_schema JSONB NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );

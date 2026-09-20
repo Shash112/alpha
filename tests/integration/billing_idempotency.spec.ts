@@ -39,35 +39,46 @@ describe('Billing Integration Tests — Webhook Idempotency & Signature', () => 
     const testWsId = crypto.randomUUID();
     const subId = crypto.randomUUID();
     
-    // Seed initial subscription
+    // Seed initial subscription with Free Personal plan
     await query(
       `INSERT INTO subscriptions (id, workspace_id, plan_id, provider, provider_subscription_id, status, current_period_start, current_period_end)
-       VALUES ($1, $2, 'plan_free_personal', 'INTERNAL', 'sub_init', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 year')`,
+       VALUES ($1, $2, 'plan_free_personal', 'INTERNAL', 'sub_init_123', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 year')`,
       [subId, testWsId]
     );
 
     const initialEntitlements = await EntitlementEngine.getEffectiveEntitlements(testWsId);
     expect(initialEntitlements['cards.max_active_count']).toBe(1);
 
-    // Simulate Stripe Checkout Session Completed webhook event
-    const eventId = `evt_stripe_checkout_${Date.now()}`;
+    // 1. Simulate checkout.session.completed -> Upgrade to Personal Pro
+    const checkoutEventId = `evt_stripe_checkout_${Date.now()}`;
+    const realSubId = `sub_stripe_${crypto.randomBytes(4).toString('hex')}`;
+    
     await query(
-      `UPDATE subscriptions SET plan_id = 'plan_personal_pro', provider = 'STRIPE', provider_subscription_id = 'sub_stripe_real_123' WHERE workspace_id = $1`,
-      [testWsId]
+      `UPDATE subscriptions SET plan_id = 'plan_personal_pro', provider = 'STRIPE', provider_subscription_id = $1 WHERE workspace_id = $2`,
+      [realSubId, testWsId]
     );
 
     const delivId = crypto.randomUUID();
     await query(
       `INSERT INTO billing_webhook_deliveries (id, provider, provider_event_id, event_type, payload, status)
        VALUES ($1, 'STRIPE', $2, 'checkout.session.completed', '{}', 'PROCESSED')`,
-      [delivId, eventId]
+      [delivId, checkoutEventId]
     );
 
     const upgradedEntitlements = await EntitlementEngine.getEffectiveEntitlements(testWsId);
     expect(upgradedEntitlements['cards.max_active_count']).toBe(5);
 
-    // Idempotency check: duplicate event insertion
-    const checkDuplicate = await query('SELECT id FROM billing_webhook_deliveries WHERE provider_event_id = $1', [eventId]);
+    // 2. Idempotency check: duplicate event insertion
+    const checkDuplicate = await query('SELECT id FROM billing_webhook_deliveries WHERE provider_event_id = $1', [checkoutEventId]);
     expect(checkDuplicate.rowCount).toBe(1);
+
+    // 3. Simulate customer.subscription.deleted -> Cancellation & Downgrade back to Free
+    await query(
+      `UPDATE subscriptions SET status = 'CANCELED', plan_id = 'plan_free_personal' WHERE provider_subscription_id = $1`,
+      [realSubId]
+    );
+
+    const downgradedEntitlements = await EntitlementEngine.getEffectiveEntitlements(testWsId);
+    expect(downgradedEntitlements['cards.max_active_count']).toBe(1);
   });
 });

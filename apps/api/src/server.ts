@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
+import Stripe from 'stripe';
 import { validateEnv, SYSTEM_CONSTANTS } from '@alpha/config';
 import { query, transaction, seedDatabase } from '@alpha/database';
 import {
@@ -24,7 +25,14 @@ export function createServer() {
 
   // 1. Middlewares
   app.use(cors({ origin: '*', credentials: true }));
-  app.use(express.json({ limit: '10mb' }));
+  app.use(
+    express.json({
+      limit: '10mb',
+      verify: (req: any, _res, buf) => {
+        req.rawBody = buf;
+      }
+    })
+  );
   app.use(express.urlencoded({ extended: true }));
 
   // Request Correlation ID Middleware
@@ -1114,7 +1122,7 @@ export function createServer() {
   // ==========================================
   app.get('/api/v1/workspaces/:workspaceId/billing/plans', async (req: Request, res: Response) => {
     try {
-      const plansRes = await query('SELECT id, family, name, billing_period, price_inr, prices_schema, entitlements_schema FROM plans WHERE is_active = TRUE ORDER BY price_inr ASC');
+      const plansRes = await query('SELECT id, family, name, billing_period, prices_schema, stripe_price_ids, entitlements_schema FROM plans WHERE is_active = TRUE ORDER BY id ASC');
       return res.status(200).json({ data: plansRes.rows });
     } catch (err: any) {
       return sendError(res, 500, 'INTERNAL_SERVER_ERROR', err.message);
@@ -1126,13 +1134,23 @@ export function createServer() {
       const { planId, provider, currency } = req.body;
       const targetProvider = (provider || 'STRIPE').toUpperCase();
       const adapter = getBillingAdapter(targetProvider);
+      const targetCurrency = (currency || 'USD').toUpperCase();
+
+      const planRes = await query('SELECT id, prices_schema, stripe_price_ids FROM plans WHERE id = $1', [planId]);
+      if (planRes.rowCount === 0) {
+        return sendError(res, 404, 'RESOURCE_NOT_FOUND', `Plan ${planId} not found.`);
+      }
+
+      const stripePriceIds = planRes.rows[0]?.stripe_price_ids || {};
+      const stripePriceId = stripePriceIds[targetCurrency] || stripePriceIds['USD'];
       
       const subResult = await adapter.createSubscription({
         workspaceId: req.tenantContext.workspaceId,
         planId,
         customerEmail: req.user.email,
         customerName: req.user.email,
-        currency: currency || 'USD'
+        currency: targetCurrency as any,
+        stripePriceId
       });
 
       await query(
@@ -1155,6 +1173,169 @@ export function createServer() {
       return res.status(200).json(subResult);
     } catch (err: any) {
       return sendError(res, 500, 'INTERNAL_SERVER_ERROR', err.message);
+    }
+  });
+
+  app.post('/api/v1/webhooks/billing/stripe', async (req: any, res: Response) => {
+    const sig = req.headers['stripe-signature'] as string;
+    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
+
+    let event: any;
+    const rawBody = req.rawBody || Buffer.from(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
+
+    if (env.STRIPE_SECRET_KEY && !env.STRIPE_SECRET_KEY.includes('mock') && sig) {
+      try {
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any });
+        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+      } catch (err: any) {
+        console.error(`❌ Stripe Webhook Signature Verification Failed: ${err.message}`);
+        return sendError(res, 400, 'INVALID_INPUT', `Webhook signature verification failed: ${err.message}`);
+      }
+    } else {
+      const adapter = new StripeAdapter();
+      const isValid = adapter.verifyWebhookSignature(
+        typeof rawBody === 'string' ? rawBody : rawBody.toString('utf8'),
+        sig,
+        webhookSecret
+      );
+      if (sig && !isValid) {
+        return sendError(res, 400, 'INVALID_INPUT', 'Webhook signature mismatch.');
+      }
+      event = req.body;
+    }
+
+    const eventId = event.id || `evt_fallback_${Date.now()}`;
+    const eventType = event.type;
+
+    const existingDelivery = await query(
+      'SELECT id, status FROM billing_webhook_deliveries WHERE provider = $1 AND provider_event_id = $2',
+      ['STRIPE', eventId]
+    );
+
+    if (existingDelivery.rowCount && existingDelivery.rowCount > 0) {
+      console.log(`ℹ️ [Stripe Webhook] Event ${eventId} already processed (${existingDelivery.rows[0].status}). Skipping.`);
+      return res.status(200).json({ received: true, duplicate: true });
+    }
+
+    const deliveryId = crypto.randomUUID();
+    await query(
+      `INSERT INTO billing_webhook_deliveries (id, provider, provider_event_id, event_type, payload, status)
+       VALUES ($1, 'STRIPE', $2, $3, $4, 'PENDING')`,
+      [deliveryId, eventId, eventType, JSON.stringify(event)]
+    );
+
+    try {
+      console.log(`⚡ [Stripe Webhook] Processing event ${eventId} (${eventType})`);
+
+      switch (eventType) {
+        case 'checkout.session.completed': {
+          const session = event.data?.object || {};
+          const workspaceId = session.client_reference_id || session.metadata?.workspace_id;
+          const planId = session.metadata?.plan_id || 'plan_personal_pro';
+          const subscriptionId = session.subscription || session.id;
+
+          if (workspaceId) {
+            const now = new Date();
+            const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+            await query(
+              `INSERT INTO subscriptions (id, workspace_id, plan_id, provider, provider_subscription_id, status, current_period_start, current_period_end)
+               VALUES ($1, $2, $3, 'STRIPE', $4, 'ACTIVE', $5, $6)
+               ON CONFLICT (workspace_id)
+               DO UPDATE SET plan_id = $3, provider = 'STRIPE', provider_subscription_id = $4, status = 'ACTIVE', current_period_start = $5, current_period_end = $6`,
+              [crypto.randomUUID(), workspaceId, planId, subscriptionId, now, periodEnd]
+            );
+            await EntitlementEngine.getEffectiveEntitlements(workspaceId);
+            console.log(`✅ [Stripe Webhook] Workspace ${workspaceId} subscription activated to plan ${planId}`);
+          }
+          break;
+        }
+
+        case 'invoice.paid': {
+          const invoice = event.data?.object || {};
+          const subscriptionId = invoice.subscription;
+          if (subscriptionId) {
+            await query(
+              `UPDATE subscriptions SET status = 'ACTIVE', current_period_end = CURRENT_TIMESTAMP + INTERVAL '1 year'
+               WHERE provider_subscription_id = $1`,
+              [subscriptionId]
+            );
+            console.log(`✅ [Stripe Webhook] Invoice paid for subscription ${subscriptionId}`);
+          }
+          break;
+        }
+
+        case 'customer.subscription.updated': {
+          const subscription = event.data?.object || {};
+          const subscriptionId = subscription.id;
+          const stripeStatus = subscription.status;
+          const planId = subscription.metadata?.plan_id;
+
+          let dbStatus = 'ACTIVE';
+          if (stripeStatus === 'past_due') dbStatus = 'PAST_DUE';
+          else if (stripeStatus === 'canceled' || stripeStatus === 'unpaid') dbStatus = 'CANCELED';
+          else if (stripeStatus === 'active') dbStatus = 'ACTIVE';
+
+          if (subscriptionId) {
+            if (planId) {
+              await query(
+                `UPDATE subscriptions SET status = $1, plan_id = $3 WHERE provider_subscription_id = $2`,
+                [dbStatus, subscriptionId, planId]
+              );
+            } else {
+              await query(
+                `UPDATE subscriptions SET status = $1 WHERE provider_subscription_id = $2`,
+                [dbStatus, subscriptionId]
+              );
+            }
+            console.log(`✅ [Stripe Webhook] Subscription ${subscriptionId} status updated to ${dbStatus}`);
+          }
+          break;
+        }
+
+        case 'customer.subscription.deleted': {
+          const subscription = event.data?.object || {};
+          const subscriptionId = subscription.id;
+          if (subscriptionId) {
+            await query(
+              `UPDATE subscriptions SET status = 'CANCELED', plan_id = 'plan_free_personal'
+               WHERE provider_subscription_id = $1`,
+              [subscriptionId]
+            );
+            console.log(`✅ [Stripe Webhook] Subscription ${subscriptionId} canceled and downgraded to free plan`);
+          }
+          break;
+        }
+
+        case 'invoice.payment_failed': {
+          const invoice = event.data?.object || {};
+          const subscriptionId = invoice.subscription;
+          if (subscriptionId) {
+            await query(
+              `UPDATE subscriptions SET status = 'PAST_DUE' WHERE provider_subscription_id = $1`,
+              [subscriptionId]
+            );
+            console.log(`⚠️ [Stripe Webhook] Payment failed for subscription ${subscriptionId}, marked PAST_DUE`);
+          }
+          break;
+        }
+
+        default:
+          console.log(`ℹ️ [Stripe Webhook] Event ${eventType} received and acknowledged.`);
+      }
+
+      await query(
+        `UPDATE billing_webhook_deliveries SET status = 'PROCESSED', processed_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [deliveryId]
+      );
+
+      return res.status(200).json({ received: true });
+    } catch (err: any) {
+      console.error(`❌ [Stripe Webhook] Error processing event ${eventId}:`, err);
+      await query(
+        `UPDATE billing_webhook_deliveries SET status = 'FAILED', error_message = $2 WHERE id = $1`,
+        [deliveryId, err.message]
+      );
+      return sendError(res, 500, 'INTERNAL_SERVER_ERROR', `Webhook handler failed: ${err.message}`);
     }
   });
 
@@ -1308,7 +1489,7 @@ export function createServer() {
       const wsCount = await query('SELECT COUNT(*) FROM workspaces');
       const cardsCount = await query('SELECT COUNT(*) FROM cards WHERE status = \'PUBLISHED\'');
       const mrrRes = await query(
-        `SELECT COALESCE(SUM(p.price_inr), 0) as mrr
+        `SELECT COALESCE(SUM(CAST(p.prices_schema->>'USD' AS INTEGER)), 0) as mrr
          FROM subscriptions s
          JOIN plans p ON s.plan_id = p.id
          WHERE s.status = 'ACTIVE'`
